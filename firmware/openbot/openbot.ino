@@ -112,17 +112,17 @@ boolean coast_mode = 1;
 #if (OPENBOT == DIY)
 const String robot_type = "DIY";
 #define MCU NANO
-#define HAS_VOLTAGE_DIVIDER 0
-const float VOLTAGE_DIVIDER_FACTOR = (20 + 10) / 10;
+#define HAS_VOLTAGE_DIVIDER 1
+const float VOLTAGE_DIVIDER_FACTOR = (22 + 10) / 10;  // 22k + 10k (rezistori din set Bitmi)
 const float VOLTAGE_MIN = 2.5f;
 const float VOLTAGE_LOW = 9.0f;
 const float VOLTAGE_MAX = 12.6f;
 const float ADC_FACTOR = 5.0 / 1023;
-#define HAS_INDICATORS 0
-#define HAS_SONAR 0
-#define SONAR_MEDIAN 0
-#define HAS_SPEED_SENSORS_FRONT 0
-#define HAS_OLED 0
+#define HAS_INDICATORS 1
+#define HAS_SONAR 1
+#define SONAR_MEDIAN 1
+#define HAS_SPEED_SENSORS_FRONT 1
+#define HAS_OLED 1
 const int PIN_PWM_L1 = 5;
 const int PIN_PWM_L2 = 6;
 const int PIN_PWM_R1 = 9;

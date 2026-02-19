@@ -17,3 +17,15 @@ wandb/
 # build
 /bin
 /node_modules/
+.env
+.env.*
+__pycache__/
+venv/
+
+# 3D print files (copies for convenience)
+print_stl/
+
+# Max Brain secrets & data
+credentials.json
+token.json
+*.db
