@@ -413,7 +413,7 @@ Server -> Client: {"type": "robot_action", "command": "forward", "duration_secon
 |---|---|---|
 | Speech-to-Text | **Whisper** (on-device, Pixel 10 TPU) | Transcrie vocea in text romanesc |
 | AI Brain | **Claude Sonnet 4.6** (rapid) / **Opus 4.6** (complex) | Intelege comanda, genereaza raspuns + actiune |
-| Text-to-Speech | **ElevenLabs** `eleven_multilingual_v2` | Voce Serban Popescu, accent romanesc |
+| Text-to-Speech | **ElevenLabs** `eleven_multilingual_v2` | Voce Jora Slobod, accent romanesc |
 | Wake Word | **"Max"** | Robotul raspunde doar cand e strigat |
 
 ### Configuratie Voce (IMPORTANT — Accent Romanesc)
@@ -422,7 +422,7 @@ Server -> Client: {"type": "robot_action", "command": "forward", "duration_secon
 # ElevenLabs — FORTEAZA accent romanesc, NU englezesc
 model_id = "eleven_multilingual_v2"   # Model multilingv (NU turbo_v2_5!)
 language_code = "ro"                   # Forteaza limba romana
-voice_id = "8nBBDfYxYXmDNaqTCxPH"    # Serban Popescu
+voice_id = "OlBp4oyr3FBAGEAtJOnU"    # Jora Slobod
 similarity_boost = 0.85               # Fidelitate mare la vocea originala romaneasca
 stability = 0.6
 style = 0.15
@@ -479,7 +479,7 @@ max_brain/
 |   +-- app.py                      # FastAPI + WebSocket + REST
 |   +-- config.py                   # Configuratie (env vars)
 |   +-- claude_brain.py             # Claude AI agentic loop
-|   +-- tools.py                    # Tool definitions (~30 tools)
+|   +-- tools.py                    # Tool definitions (~60 tools)
 |   +-- memory.py                   # SQLite memory system
 |   +-- elevenlabs_voice.py         # TTS (return bytes, no playback)
 |   +-- google_auth.py              # OAuth2 + API Key auth
@@ -493,6 +493,14 @@ max_brain/
 |   +-- maps_service.py             # Google Maps
 |   +-- air_quality_service.py      # Air Quality API
 |   +-- smarthome_service.py        # Home Assistant
+|   +-- weather_service.py          # Vremea (Open-Meteo, gratuit)
+|   +-- news_service.py             # Stiri (Google News RSS, gratuit)
+|   +-- search_service.py           # Cautare web (DuckDuckGo, gratuit)
+|   +-- timer_service.py            # Timer & Alarme (in-memory)
+|   +-- keep_service.py             # Google Keep (Workspace)
+|   +-- slides_service.py           # Google Slides
+|   +-- forms_service.py            # Google Forms
+|   +-- auth_local.py               # OAuth2 local flow (run once)
 |   +-- requirements.txt            # fastapi, uvicorn, websockets
 |   +-- render.yaml                 # Render.com deploy config
 +-- client/                         # Ruleaza pe telefon/laptop
@@ -538,15 +546,22 @@ python max_client.py --url ws://localhost:8000/ws
 python max_client.py --url wss://max-brain.onrender.com/ws --key YOUR_KEY
 ```
 
-### Deploy pe Render.com
+### Deploy pe Render.com — DONE (19 Feb 2026)
 
-1. Push pe GitHub
-2. Render > New > Web Service > Connect repo
-3. Root Directory: `max_brain/server`
-4. Build: `pip install -r requirements.txt`
-5. Start: `uvicorn app:app --host 0.0.0.0 --port $PORT`
-6. Seteaza env vars in dashboard
-7. Google OAuth: ruleaza auth local, copiaza token in GOOGLE_TOKEN_JSON env var
+- **URL live:** `https://max-brain.onrender.com`
+- **GitHub repo:** `https://github.com/gabrielursan-beep/openbot-max` (privat)
+- **Service ID:** `srv-d6bgusogjchc73aj989g`
+- **Region:** Frankfurt
+- **Plan:** Starter
+- **Auto-deploy:** Da (la push pe `main`)
+- **Cron job:** Morning briefing luni-vineri la 09:00 (Romania) — `crn-d6bh3gcr85hc73baku20`
+- **Env vars setate:** ANTHROPIC_API_KEY, ELEVENLABS_API_KEY, MAX_SERVER_KEY, GOOGLE_MAPS_API_KEY, GMAIL_USER, GMAIL_APP_PASSWORD, HOME_ASSISTANT_URL, GOOGLE_TOKEN_JSON, GOOGLE_CREDENTIALS_JSON
+- **MAX_SERVER_KEY:** setat in `.env` local si pe Render
+
+Conectare client:
+```bash
+python3 max_client.py --url wss://max-brain.onrender.com/ws --key YOUR_MAX_SERVER_KEY
+```
 
 ---
 
@@ -678,7 +693,7 @@ OpenBot/
 │   │   ├── app.py                         ← FastAPI + WebSocket + REST
 │   │   ├── config.py                      ← Configuratie (env vars)
 │   │   ├── claude_brain.py                ← Claude AI agentic loop
-│   │   ├── tools.py                       ← Tool definitions (~30 tools)
+│   │   ├── tools.py                       ← Tool definitions (~60 tools)
 │   │   ├── elevenlabs_voice.py            ← TTS (return bytes, no playback)
 │   │   ├── google_auth.py                 ← OAuth2 + API Key auth
 │   │   ├── *_service.py                   ← Gmail, Calendar, Drive, Sheets, etc.
