@@ -400,11 +400,14 @@ Cel mai bun chip pentru ML on-device (TPU optimizat pt TFLite). Perfect pentru W
 
 Protocol WebSocket:
 ```
+Client -> Server: {"type": "client_info", "platform": "termux", "wants_audio": true, "version": "2.0"}
 Client -> Server: {"type": "command", "text": "...", "user": "Gabriel"}
+Client -> Server: {"type": "ping"}
 Server -> Client: {"type": "status", "message": "Thinking...", "model": "sonnet"}
 Server -> Client: {"type": "tool", "name": "read_emails", "status": "executing"}
 Server -> Client: {"type": "response", "text": "...", "audio_base64": "..."}
 Server -> Client: {"type": "robot_action", "command": "forward", "duration_seconds": 3}
+Server -> Client: {"type": "pong"}
 ```
 
 ### Componente Software
@@ -595,6 +598,46 @@ python3 max_client.py --url wss://max-brain.onrender.com/ws --key YOUR_MAX_SERVE
 - [ ] Testeaza camera — functioneaza OK?
 - [ ] Testeaza microfonul — inregistreaza o proba vocala
 - [ ] Instaleaza Whisper (cand integram voice control pe Android)
+- [ ] (Optional) Instaleaza Claude Code CLI pe Termux (vezi Faza 3b)
+
+### Faza 3b: Claude Code pe Termux (AI Debugging & Monitoring)
+
+Claude Code CLI direct pe telefon — monitorizare + fix probleme in timp real.
+
+**Optiunea 1 — Install direct (experimental, ARM64):**
+```bash
+# In Termux:
+pkg install nodejs
+npm install -g @anthropic-ai/claude-code
+claude login              # Autentificare cu cont Claude Max plan
+```
+
+**Daca merge, configureaza MCP servers:**
+```bash
+# MCP Render — acces la server, deploy, logs
+claude mcp add render --transport http https://mcp.render.com/mcp
+
+# Acces local: Claude Code vede deja tot filesystem-ul din Termux
+# ~/max-brain/client/max_client.py, config, logs — totul accesibil
+```
+
+**Optiunea 2 — Fallback SSH (daca npm install esueaza pe ARM64):**
+```bash
+# Pe Termux: porneste SSH server
+pkg install openssh
+sshd    # Asculta pe port 8022
+
+# De pe Mac (pe aceeasi retea WiFi):
+ssh -p 8022 user@<ip-pixel-10>
+# Acum ai Claude Code pe Mac cu acces la fisierele de pe telefon
+```
+
+**Ce poate face Claude Code pe telefon:**
+- Monitorizare in timp real: citeste logs, diagnosticheaza erori
+- Fix-uri live: editeaza max_client.py, config, setup scripts
+- Acces MCP Render: vede starea serverului, deploy-uri, logs server-side
+- Privire de ansamblu: vede tot ecosistemul (client local + server remote)
+- Debug OpenBot bridge: verifica conexiunea TCP:19400 cu OpenBot app
 
 ### Faza 4: Asamblare Mecanica
 - [ ] Lipeste fire la cele 4 motoare (ciocan de lipit)
@@ -700,7 +743,10 @@ OpenBot/
 │   │   ├── requirements.txt               ← fastapi, uvicorn, websockets
 │   │   └── render.yaml                    ← Render.com deploy config
 │   └── client/                            ← Ruleaza pe telefon/laptop
-│       ├── max_client.py                  ← WebSocket client + audio playback
+│       ├── max_client.py                  ← WebSocket client v2.0 + OpenBot bridge TCP:19400
+│       ├── config_client.json             ← Config centralizat (server, whisper, wake word)
+│       ├── setup_termux.sh                ← Setup Termux: packages, whisper.cpp, Claude Code
+│       ├── boot/start-max.sh              ← Auto-start la boot (Termux:Boot)
 │       └── requirements.txt               ← websockets
 └── docs/images/
     └── wiring_diagram.png                 ← Schema de conexiuni vizuala
