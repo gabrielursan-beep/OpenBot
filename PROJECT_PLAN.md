@@ -184,6 +184,29 @@
 | Bambu Lab P2S (imprimanta 3D) | AI |
 | Bambu Lab PLA Matte Orange (filament) | AI |
 
+### D. De comandat SUPLIMENTAR (Feb 2026)
+
+> Suporturile individuale 18650 de pe Bitmi NU incap in Block Body Big LEGO.
+> Comanda suportul comercial 3-celule (piesa oficiala OpenBot) + discuri encoder.
+
+| # | Componenta | Qty | De unde | Pret | Status |
+|---|---|---|---|---|---|
+| 1 | **Suport baterii 3x18650 (cutie serie)** | 1 | **Sierra.ro** | **17.70 RON** | DE COMANDAT |
+| 2 | **Discuri encoder 20 slot** (pt speed sensors) | 2 | Amazon.de / AliExpress | ~5-10 EUR pack | DE COMANDAT |
+| 3 | **Velcro adeziv** (fixare suport baterii) | 1 buc | Dedeman / bricolaj | ~3-5 RON | DE COMANDAT |
+
+**Suport baterii — piesa CRITICA:**
+- Cutie plastic pentru 3x 18650 in SERIE (output ~11.1V), 2 fire iesire (rosu + negru)
+- Dimensiuni: 76 x 59 x 21mm — INCAPE in Block Body Big LEGO
+- **Link:** [Sierra.ro — 17.70 RON, IN STOC](https://www.sierra.ro/cumpara/suport-acumulator-liion-format-18650-3-celule-in-serie-2151)
+- NU clipuri individuale (alea nu incap)!
+
+**Discuri encoder — pt speed sensors:**
+- Disc cu 20 sloturi, se pune pe axul interior al motorului TT
+- Fara disc, modulele senzor IR (Bitmi) nu pot masura viteza
+- OptimusDigital.ro are la 6 RON/buc dar STOC 0
+- [Amazon.com 10pack](https://www.amazon.com/Encoder-Lattice-Digital-Precision-Velocity/dp/B093LBHR95)
+
 ---
 
 ## 6. COST TOTAL ESTIMAT
@@ -210,12 +233,12 @@ Arduino Nano          Componenta
 ─────────────         ────────────────────────────────
 D2  ────────────────  Speed Sensor STANGA (OUT)
 D3  ────────────────  Speed Sensor DREAPTA (OUT)
-D4  ────────────────  LED Indicator STANGA (prin R 220 ohm din set Bitmi)
-D5  ────────────────  L298N ENA (PWM Motor Stanga 1)
-D6  ────────────────  L298N IN1 (PWM Motor Stanga 2)
-D7  ────────────────  LED Indicator DREAPTA (prin R 220 ohm din set Bitmi)
-D9  ────────────────  L298N ENB (PWM Motor Dreapta 1)
-D10 ────────────────  L298N IN2 (PWM Motor Dreapta 2)
+D4  ────────────────  LED Indicator STANGA (prin R 150 ohm)
+D5  ────────────────  L298N IN1 (PWM Motor Stanga)
+D6  ────────────────  L298N IN2 (PWM Motor Stanga)
+D7  ────────────────  LED Indicator DREAPTA (prin R 150 ohm)
+D9  ────────────────  L298N IN3 (PWM Motor Dreapta)
+D10 ────────────────  L298N IN4 (PWM Motor Dreapta)
 D11 ────────────────  HC-SR04 ECHO
 D12 ────────────────  HC-SR04 TRIGGER
 A4  ────────────────  OLED SDA (I2C)
@@ -245,17 +268,17 @@ L298N              Conexiune
 12V IN  ──────── Baterie (+) (prin switch On/Off)
 GND     ──────── Baterie (-) / Arduino GND
 5V OUT  ──────── Arduino 5V / distributor 5V
-ENA     ──────── Arduino D5 (SCOATE JUMPER-UL!)
-IN1     ──────── Arduino D6
-IN2     ──────── (gestionat de firmware)
-ENB     ──────── Arduino D9 (SCOATE JUMPER-UL!)
-IN3     ──────── Arduino D10
-IN4     ──────── (gestionat de firmware)
+ENA     ──────── JUMPER PE LOC (HIGH = motoare enabled)
+IN1     ──────── Arduino D5 (PWM motor stanga)
+IN2     ──────── Arduino D6 (PWM motor stanga)
+ENB     ──────── JUMPER PE LOC (HIGH = motoare enabled)
+IN3     ──────── Arduino D9 (PWM motor dreapta)
+IN4     ──────── Arduino D10 (PWM motor dreapta)
 OUT1/2  ──────── Motoare STANGA (2 motoare in paralel)
 OUT3/4  ──────── Motoare DREAPTA (2 motoare in paralel)
 ```
 
-**CRITICAL: Scoate jumper-ele de pe ENA si ENB pe L298N! Fara asta, PWM-ul nu functioneaza si motoarele merg doar full speed sau deloc.**
+**CRITICAL: Jumper-urile ENA si ENB RAMAN pe loc! Firmware-ul OpenBot foloseste 4 pini PWM direct pe IN1-IN4 (nu pe ENA/ENB). Daca scoti jumper-urile, motoarele NU merg deloc.**
 
 ---
 
@@ -583,12 +606,14 @@ python3 max_client.py --url wss://max-brain.onrender.com/ws --key YOUR_MAX_SERVE
 - [ ] Curata piesele printate dupa racire
 - [ ] Verifica fitment-ul camera elevator intre body top si phone mount
 
-### Faza 2: Comanda Piese Electronice — DONE
+### Faza 2: Comanda Piese Electronice — DONE + SUPLIMENTAR
 - [x] Comanda de pe Bitmi.ro toate cele 12 produse din Sectiunea 5A (~334 RON)
-- [ ] Comanda separat: suruburi M3x25 (16), piulite M3 hex (16), suruburi M3x5 (6) — Dedeman/Bricostore
-- [ ] Comanda separat: 2x LED portocaliu 5mm + 1x intrerupator On/Off mic
+- [x] Comanda separat: suruburi M3x25, piulite M3, M3x10, LED-uri, switch
 - [x] Comanda cablu USB-C OTG (USB-C la USB-A) — pentru Pixel 10
-- [ ] Verifica ca ai ciocan de lipit, fludor, si multimetru
+- [x] Ciocan de lipit — AI
+- [ ] **COMANDA Sierra.ro:** suport baterii 3x18650 cutie serie (17.70 RON) — vezi sectiunea 5D
+- [ ] **COMANDA:** discuri encoder 20 slot pt speed sensors (2 buc) — Amazon/AliExpress
+- [ ] **COMANDA:** velcro adeziv (fixare suport baterii in body)
 
 ### Faza 3: Pregatire Pixel 10 — CAND VINE TELEFONUL (azi)
 - [ ] Scoate din cutie si configureaza initial (Android 16)
@@ -640,25 +665,27 @@ ssh -p 8022 user@<ip-pixel-10>
 - Debug OpenBot bridge: verifica conexiunea TCP:19400 cu OpenBot app
 
 ### Faza 4: Asamblare Mecanica
-- [ ] Lipeste fire la cele 4 motoare (ciocan de lipit)
-- [ ] Pune discurile encoder pe cele 2 motoare din FATA
-- [ ] Monteaza cele 4 motoare pe body_bottom cu 16x M3x25 + 16x piulite M3
-- [ ] Monteaza L298N pe body_bottom cu 4x M3x5
-- [ ] Monteaza senzorul ultrasonic HC-SR04 in slotul din fata
+- [x] ~~Lipeste fire la cele 4 motoare~~ — DEJA FACUTE
+- [ ] Pune discurile encoder pe cele 2 motoare din FATA (cand vin)
+- [ ] Conecteaza motoarele la L298N (OUT1/2 stanga, OUT3/4 dreapta) INAINTE de montare
+- [ ] Monteaza cele 4 motoare pe body_bottom cu 8x M3x25 + 8x piulite M3
+- [ ] Monteaza L298N pe body_bottom cu 4x M3x10
+- [ ] **Verifica jumper-uri ENA/ENB pe loc!**
+- [ ] Monteaza HC-SR04 in fata (push-fit)
 
-### Faza 5: Cablare Electronica
-- [ ] **SCOATE jumper-ele ENA si ENB de pe L298N**
-- [ ] Conecteaza motoarele stanga la OUT1 (+) / OUT2 (-) pe L298N
-- [ ] Conecteaza motoarele dreapta la OUT4 (+) / OUT3 (-) pe L298N
-- [ ] Construieste distribuitor 5V/GND (perfboard + header 6x2)
-- [ ] Conecteaza 5V OUT de pe L298N la distribuitor
-- [ ] Cableaza Arduino Nano conform schemei din Sectiunea 7
-- [ ] Monteaza speed sensors pe cele 2 motoare din fata
-- [ ] Monteaza LED-urile portocalii (D4 si D7 prin rezistori 220 ohm din set Bitmi)
-- [ ] Conecteaza divisorul de tensiune (22k ohm + 10k ohm din set Bitmi, la A7)
-- [ ] Conecteaza OLED display (SDA=A4, SCL=A5, VCC=5V, GND)
-- [ ] Monteaza switch On/Off pe firul pozitiv al bateriei
-- [ ] Monteaza suportul de baterii 18650
+### Faza 5: Baterii + Cablare Electronica
+- [ ] Lipeste velcro pe suportul 3-celule + pe interiorul body
+- [ ] Fixeaza suportul de baterii in body, introdu 3x 18650
+- [ ] Push-fit switch in slot, **LIPESTE** fir rosu baterii → switch → L298N +12V
+- [ ] Fir negru baterii → L298N GND (direct)
+- [ ] Conecteaza motoare: D5→IN1, D6→IN2, D9→IN3, D10→IN4
+- [ ] Conecteaza senzori la 5V + GND
+- [ ] Speed sensors: stanga D0→D2, dreapta D0→D3
+- [ ] Sonar: Trig→D12, Echo→D11
+- [ ] **LIPESTE** LED-uri (prin 150R): stanga→D4, dreapta→D7, GND ambele
+- [ ] **LIPESTE** voltage divider: 22K de la baterie(+), 10K la GND, punct comun→A7
+- [ ] OLED: VIN→5V, GND→GND, SCL→A5, SDA→A4
+- [ ] L298N 5V → Arduino 5V, L298N GND → Arduino GND
 
 ### Faza 6: Firmware
 - [ ] Instaleaza Arduino IDE
@@ -759,11 +786,11 @@ OpenBot/
 | Problema | Cauza Probabila | Solutie |
 |---|---|---|
 | Arduino nu apare in IDE | Driver lipsa | Instaleaza driver CH340 |
-| Motoarele nu merg deloc | Jumper-ele ENA/ENB sunt pe L298N | **Scoate jumper-ele!** |
+| Motoarele nu merg deloc | Jumper-ele ENA/ENB scoase | **Pune jumper-urile inapoi!** ENA/ENB trebuie ON |
 | Motoarele merg invers | Polaritate inversata | Inverseaza firele + si - la motor pe L298N |
 | Un motor merge, altul nu | Conexiune slaba | Verifica lipiturile si OUT1-4 |
 | Telefonul nu vede Arduino | Cablu OTG incompatibil | Incearca alt cablu; verifica USB debugging ON |
-| Tensiune baterie citeste 0 | Divisor de tensiune gresit | Verifica 20k/10k si pinul A7 cu multimetru |
+| Tensiune baterie citeste 0 | Divisor de tensiune gresit | Verifica 22K/10K si pinul A7 cu multimetru |
 | Sonar citeste 0 cm | Pini inversati sau conector | Verifica Trigger=D12, Echo=D11 |
 | OLED nu afiseaza nimic | I2C gresit | Verifica SDA=A4, SCL=A5; adresa I2C = 0x3C |
 | Robot nu vireaza pe covor | Frictiune 4WD fara diferential | Normal; testeaza pe suprafata neteda |
@@ -811,6 +838,12 @@ OpenBot/
 
 ### Componente Bitmi — SOSITE (20 Feb 2026)
 Toate componentele au sosit: Arduino Nano, L298N, motoare TT, HC-SR04, OLED, baterii 18650, switch, LEDs, șuruburi M3x25+M3x10, cablu USB OTG, fire Dupont, rezistoare.
+
+### Comenzi SUPLIMENTARE (20 Feb 2026)
+- [ ] **Sierra.ro:** Suport baterii 3x18650 cutie serie — 17.70 RON, IN STOC
+- [ ] **Amazon/AliExpress:** 2x discuri encoder 20 slot pt motor TT
+- [ ] **Dedeman/bricolaj:** Velcro adeziv
+- **Motiv:** Suporturile individuale 18650 (Bitmi) NU incap in Block Body Big LEGO. Suportul comercial 3-celule (76x59x21mm) e piesa oficiala OpenBot.
 
 ---
 
