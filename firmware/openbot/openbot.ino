@@ -113,7 +113,7 @@ boolean coast_mode = 1;
 const String robot_type = "DIY";
 #define MCU NANO
 #define HAS_VOLTAGE_DIVIDER 1
-const float VOLTAGE_DIVIDER_FACTOR = (22 + 10) / 10;  // 22k + 10k (rezistori din set Bitmi)
+const float VOLTAGE_DIVIDER_FACTOR = (22.0 + 10.0) / 10.0;  // 22k + 10k (rezistori din set Bitmi)
 const float VOLTAGE_MIN = 2.5f;
 const float VOLTAGE_LOW = 9.0f;
 const float VOLTAGE_MAX = 12.6f;

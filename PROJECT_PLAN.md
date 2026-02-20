@@ -1,6 +1,6 @@
 # OpenBot - Plan Proiect FULL OPTIONS
 
-## Status: IN LUCRU — 3D print DONE, Pixel 10 sosit, software gata, așteptăm componente Bitmi
+## Status: ASAMBLARE FIZICA — Componente sosite 20 Feb 2026, software gata, construim robotul
 
 ---
 
@@ -798,89 +798,78 @@ OpenBot/
 
 ---
 
-## 16. PAȘI URMĂTORI — CE PUTEM FACE ACUM (Feb 2026)
+## 16. PROGRES SETUP (Feb 2026)
 
-> Componentele Bitmi nu au sosit. Dar aproape tot software-ul + pregătirea se poate face ACUM.
+### Software — COMPLET
+- [x] **PASUL 1:** Developer Mode pe Pixel 10
+- [x] **PASUL 2:** OpenBot v0.8.0 instalat
+- [x] **PASUL 3:** F-Droid + Termux + Termux:API + Termux:Boot
+- [x] **PASUL 4:** Transfer fișiere + setup Termux + Whisper compilat
+- [x] **PASUL 5:** Config server key setat via ADB push
+- [~] **PASUL 6:** Test voce Max Brain — PARTIAL (text mode OK, voice mode debug in progress)
+- [x] **PASUL 9:** Decizie M3x5 → folosim M3x10 ca alternativă
 
-### Checklist — fără componente electronice
+### Componente Bitmi — SOSITE (20 Feb 2026)
+Toate componentele au sosit: Arduino Nano, L298N, motoare TT, HC-SR04, OLED, baterii 18650, switch, LEDs, șuruburi M3x25+M3x10, cablu USB OTG, fire Dupont, rezistoare.
 
-- [ ] **PASUL 1: Developer Mode pe Pixel 10** (5 min)
-  - Settings → About Phone → tap 7x pe "Build Number"
-  - Settings → System → Developer Options → Enable USB Debugging
-  - Settings → System → Developer Options → Enable Install via USB
-  - Opțional: Stay Awake (ecran activ pe încărcare)
+---
 
-- [ ] **PASUL 2: Instalare OpenBot Robot App** (5 min)
-  - Deschide pe telefon: `https://app.openbot.org/robot` → descarcă APK → instalează
-  - SAU de pe Mac: `adb install OpenBot-robot.apk`
-  - Dă toate permisiunile (cameră, locație, microfon, storage)
-  - Normal: va arăta "No vehicle connected" fără Arduino
+## 17. ASAMBLARE ROBOT FIZIC (20 Feb 2026)
 
-- [ ] **PASUL 3: Instalare Termux + Termux:API + Termux:Boot** (10 min)
-  - **IMPORTANT: Instalează din F-Droid, NU din Play Store!**
-  - Instalează F-Droid (https://f-droid.org)
-  - Din F-Droid: Termux, Termux:API, Termux:Boot
+> **Ghid complet cu checklist:** `max_brain/docs/ASSEMBLY_CHECKLIST.md`
 
-- [ ] **PASUL 4: Transfer fișiere client + setup Termux** (30-60 min)
-  - Instalează ADB pe Mac (dacă nu e deja):
-    ```bash
-    brew install android-platform-tools
-    ```
-  - De pe Mac, cu telefon conectat USB:
-    ```bash
-    cd /Users/gabrielursan/Projects/OpenBot/max_brain/client
-    bash transfer_to_pixel.sh
-    ```
-  - Pe telefon, în Termux:
-    ```bash
-    cp /sdcard/max-brain-client/setup_termux.sh ~/
-    bash ~/setup_termux.sh
-    ```
-  - Așteaptă compilarea whisper.cpp (~5-10 min pe Pixel 10)
-  - Opțional: instalează llama.cpp + Llama 3.1 8B (~5GB)
+### Sumar faze asamblare (12 faze)
 
-- [ ] **PASUL 5: Configurare server key** (2 min)
-  - Pe telefon, în Termux:
-    ```bash
-    nano ~/max-brain/client/config_client.json
-    ```
-  - Setează `server_key` la valoarea MAX_SERVER_KEY din Render env vars
+| Faza | Descriere | Status |
+|------|-----------|--------|
+| 1 | Pregătire motoare (fire + discuri encoder) | [ ] |
+| 2 | Conectare motoare la L298N + montare pe body | [ ] |
+| 3 | Montare L298N (jumper-uri ENA/ENB RĂMÂN pe loc!) | [ ] |
+| 4 | Senzor ultrasonic HC-SR04 | [ ] |
+| 5 | LED-uri indicator cu rezistori 150Ω | [ ] |
+| 6 | Phone mount | [ ] |
+| 7 | Speed sensors | [ ] |
+| 8 | Baterii + switch | [ ] |
+| 9 | Cablare completă (Dupont) | [ ] |
+| 10 | Închidere body + roți | [ ] |
+| 11 | Arduino IDE + Upload firmware | [ ] |
+| 12 | Test end-to-end | [ ] |
 
-- [ ] **PASUL 6: Test voce Max Brain (FĂRĂ robot)** (5 min)
-  - `cd ~/max-brain/client && python max_client.py`
-  - Testează: "Max, ce oră e?" / "Max, citește emailurile" / "Max, ce vreme e?"
-  - Tot voice-ul funcționează FĂRĂ robot fizic — doar telefon + WiFi
+### Corecții critice față de planul inițial
 
-- [ ] **PASUL 7: Asamblare parțială body** (15 min)
-  - Phone mount (bottom + top) pe placa superioară cu 2x M3x25
-  - Spring/elastic pentru phone mount (DE VERIFICAT dacă e necesar)
-  - LED-urile galbene în sloturi (nu conecta încă)
-  - Switch on/off push-fit în slot
-  - NU monta motoare, L298N, Arduino — le așteptăm
+1. **VOLTAGE_DIVIDER_FACTOR BUG** (firmware linia 116): `(22 + 10) / 10` era integer division = 3 în loc de 3.2. **CORECTAT** la `(22.0 + 10.0) / 10.0`.
 
-- [ ] **PASUL 8: Arduino IDE pe Mac** (15 min)
-  - Descarcă Arduino IDE: https://www.arduino.cc/en/software
-  - Instalează librării (Tools → Manage Libraries):
-    - PinChangeInterrupt by NicoHood
-    - Adafruit SSD1306
-    - Adafruit GFX Library
-  - Descarcă driver CH340: http://www.wch.cn/download/CH341SER_MAC_ZIP.html
-  - Deschide `firmware/openbot/openbot.ino`
-  - Verify/Compile (fără upload) — verificare că totul compilează
+2. **Jumper-uri ENA/ENB:** NU se scot! Firmware-ul folosește 4 PWM pe IN1-IN4, ENA/ENB trebuie HIGH (jumper ON). Confirmat din wiring_diagram.png oficial.
 
-- [ ] **PASUL 9: Decizie M3x5** (2 min)
-  - 6x M3x5 necesare: 4x L298N pe body + 2x speed sensors
-  - Alternativă: M3x10 merg (ies puțin pe cealaltă parte, dar funcțional OK)
+### Cablare rapidă — pin map
 
-**Total: ~1.5-2 ore de lucru productiv fără componente.**
+```
+Arduino D5  → L298N IN1    (motor stânga)
+Arduino D6  → L298N IN2    (motor stânga)
+Arduino D9  → L298N IN4    (motor dreapta)
+Arduino D10 → L298N IN3    (motor dreapta)
+Arduino D2  → Speed sensor stânga D0
+Arduino D3  → Speed sensor dreapta D0
+Arduino D4  → LED stânga (prin 150Ω)
+Arduino D7  → LED dreapta (prin 150Ω)
+Arduino D12 → HC-SR04 Trig
+Arduino D11 → HC-SR04 Echo
+Arduino A7  → Voltage divider (22kΩ+10kΩ)
+Arduino A5  → OLED SCL
+Arduino A4  → OLED SDA
+L298N 5V    → Arduino 5V + senzori VCC
+L298N GND   → Arduino GND + senzori GND
+Baterie +   → Switch → L298N +12V
+Baterie -   → L298N GND
+```
 
-### După sosirea componentelor Bitmi
+### Șuruburi necesare
 
-- [ ] Lipire fire la motoare
-- [ ] Montare 4x motoare TT cu 8x M3x25
-- [ ] Montare L298N cu 4x M3x5 (sau M3x10)
-- [ ] Cablare completă (Dupont wires, vezi secțiunea 7)
-- [ ] Upload firmware pe Arduino Nano (Sketch → Upload)
-- [ ] Test Serial Monitor (comenzi `c128,128` etc.)
-- [ ] Conectare USB OTG la Pixel 10
-- [ ] Test complet end-to-end: voce → server → robot se mișcă
+| Utilizare | Tip | Cantitate |
+|-----------|-----|-----------|
+| Motoare pe body | M3x25 + piulițe | 8+8 |
+| Phone mount | M3x25 + piulițe | 2+2 |
+| Top cover | M3x25 + piulițe | 6+6 |
+| L298N pe body | M3x10 | 4 |
+| Speed sensors | M3x10 | 2 |
+| **Total** | M3x25: 16 (ai 20) / M3x10: 6 (ai 20) | |
