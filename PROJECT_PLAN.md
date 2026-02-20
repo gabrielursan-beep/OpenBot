@@ -1,6 +1,6 @@
 # OpenBot - Plan Proiect FULL OPTIONS
 
-## Status: IN LUCRU — Piese comandate, printare 3D in curs, software voce gata de test
+## Status: IN LUCRU — 3D print DONE, Pixel 10 sosit, software gata, așteptăm componente Bitmi
 
 ---
 
@@ -795,3 +795,92 @@ OpenBot/
 - **Whisper (OpenAI):** https://github.com/openai/whisper
 - **whisper.cpp (C++ port for mobile):** https://github.com/ggerganov/whisper.cpp
 - **Google Pixel 10:** https://store.google.com/product/pixel_10
+
+---
+
+## 16. PAȘI URMĂTORI — CE PUTEM FACE ACUM (Feb 2026)
+
+> Componentele Bitmi nu au sosit. Dar aproape tot software-ul + pregătirea se poate face ACUM.
+
+### Checklist — fără componente electronice
+
+- [ ] **PASUL 1: Developer Mode pe Pixel 10** (5 min)
+  - Settings → About Phone → tap 7x pe "Build Number"
+  - Settings → System → Developer Options → Enable USB Debugging
+  - Settings → System → Developer Options → Enable Install via USB
+  - Opțional: Stay Awake (ecran activ pe încărcare)
+
+- [ ] **PASUL 2: Instalare OpenBot Robot App** (5 min)
+  - Deschide pe telefon: `https://app.openbot.org/robot` → descarcă APK → instalează
+  - SAU de pe Mac: `adb install OpenBot-robot.apk`
+  - Dă toate permisiunile (cameră, locație, microfon, storage)
+  - Normal: va arăta "No vehicle connected" fără Arduino
+
+- [ ] **PASUL 3: Instalare Termux + Termux:API + Termux:Boot** (10 min)
+  - **IMPORTANT: Instalează din F-Droid, NU din Play Store!**
+  - Instalează F-Droid (https://f-droid.org)
+  - Din F-Droid: Termux, Termux:API, Termux:Boot
+
+- [ ] **PASUL 4: Transfer fișiere client + setup Termux** (30-60 min)
+  - Instalează ADB pe Mac (dacă nu e deja):
+    ```bash
+    brew install android-platform-tools
+    ```
+  - De pe Mac, cu telefon conectat USB:
+    ```bash
+    cd /Users/gabrielursan/Projects/OpenBot/max_brain/client
+    bash transfer_to_pixel.sh
+    ```
+  - Pe telefon, în Termux:
+    ```bash
+    cp /sdcard/max-brain-client/setup_termux.sh ~/
+    bash ~/setup_termux.sh
+    ```
+  - Așteaptă compilarea whisper.cpp (~5-10 min pe Pixel 10)
+  - Opțional: instalează llama.cpp + Llama 3.1 8B (~5GB)
+
+- [ ] **PASUL 5: Configurare server key** (2 min)
+  - Pe telefon, în Termux:
+    ```bash
+    nano ~/max-brain/client/config_client.json
+    ```
+  - Setează `server_key` la valoarea MAX_SERVER_KEY din Render env vars
+
+- [ ] **PASUL 6: Test voce Max Brain (FĂRĂ robot)** (5 min)
+  - `cd ~/max-brain/client && python max_client.py`
+  - Testează: "Max, ce oră e?" / "Max, citește emailurile" / "Max, ce vreme e?"
+  - Tot voice-ul funcționează FĂRĂ robot fizic — doar telefon + WiFi
+
+- [ ] **PASUL 7: Asamblare parțială body** (15 min)
+  - Phone mount (bottom + top) pe placa superioară cu 2x M3x25
+  - Spring/elastic pentru phone mount (DE VERIFICAT dacă e necesar)
+  - LED-urile galbene în sloturi (nu conecta încă)
+  - Switch on/off push-fit în slot
+  - NU monta motoare, L298N, Arduino — le așteptăm
+
+- [ ] **PASUL 8: Arduino IDE pe Mac** (15 min)
+  - Descarcă Arduino IDE: https://www.arduino.cc/en/software
+  - Instalează librării (Tools → Manage Libraries):
+    - PinChangeInterrupt by NicoHood
+    - Adafruit SSD1306
+    - Adafruit GFX Library
+  - Descarcă driver CH340: http://www.wch.cn/download/CH341SER_MAC_ZIP.html
+  - Deschide `firmware/openbot/openbot.ino`
+  - Verify/Compile (fără upload) — verificare că totul compilează
+
+- [ ] **PASUL 9: Decizie M3x5** (2 min)
+  - 6x M3x5 necesare: 4x L298N pe body + 2x speed sensors
+  - Alternativă: M3x10 merg (ies puțin pe cealaltă parte, dar funcțional OK)
+
+**Total: ~1.5-2 ore de lucru productiv fără componente.**
+
+### După sosirea componentelor Bitmi
+
+- [ ] Lipire fire la motoare
+- [ ] Montare 4x motoare TT cu 8x M3x25
+- [ ] Montare L298N cu 4x M3x5 (sau M3x10)
+- [ ] Cablare completă (Dupont wires, vezi secțiunea 7)
+- [ ] Upload firmware pe Arduino Nano (Sketch → Upload)
+- [ ] Test Serial Monitor (comenzi `c128,128` etc.)
+- [ ] Conectare USB OTG la Pixel 10
+- [ ] Test complet end-to-end: voce → server → robot se mișcă
