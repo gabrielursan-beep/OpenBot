@@ -47,14 +47,15 @@
 #define RTR_TT2 6   // Ready-to-Run with TT-motors
 #define RTR_520 7    // Ready-to-Run with 520-motors
 #define MTV 8        // Multi Terrain Vehicle
-#define DIY_ESP32 9  // DIY without PCB
+#define DIY_ESP32 9    // DIY without PCB
+#define WAVE_ROVER 10  // Waveshare Wave Rover with TB6612FNG
 
 //------------------------------------------------------//
 // SETUP - Choose your body
 //------------------------------------------------------//
 
 // Setup the OpenBot version (DIY, PCB_V1, PCB_V2, RTR_TT, RC_CAR, LITE, RTR_TT2, RTR_520, DIY_ESP32)
-#define OPENBOT DIY
+#define OPENBOT WAVE_ROVER
 
 //------------------------------------------------------//
 // SETTINGS - Global settings
@@ -533,8 +534,69 @@ const int PIN_LED_RF = 21;
 const int PIN_LED_Y = 14;
 const int PIN_LED_G = 27;
 const int PIN_LED_B = 26;
+
+//-------------------------WAVE_ROVER--------------------//
+#elif (OPENBOT == WAVE_ROVER)
+const String robot_type = "WAVE_ROVER";
+#define MCU ESP32
+#include <esp_wifi.h>
+#include <Wire.h>
+#include <INA219_WE.h>
+#define HAS_BLUETOOTH 1
+#define HAS_INA219 1
+#define HAS_VOLTAGE_DIVIDER 0
+const float VOLTAGE_MIN = 6.0f;
+const float VOLTAGE_LOW = 9.0f;
+const float VOLTAGE_MAX = 12.6f;
+#define HAS_INDICATORS 0
+#define HAS_SONAR 1
+#define SONAR_MEDIAN 0
+#define HAS_BUMPER 0
+#define HAS_SPEED_SENSORS_FRONT 1
+#define HAS_OLED 1
+#define HAS_LEDS_FRONT 0
+#define HAS_LEDS_BACK 0
+#define HAS_LEDS_STATUS 0
+
+// ESP32 compatibility macros
+#define analogWrite ledcWrite
+#define attachPinChangeInterrupt attachInterrupt
+#define detachPinChangeInterrupt detachInterrupt
+#define digitalPinToPinChangeInterrupt digitalPinToInterrupt
+
+// TB6612FNG motor control pins
+const int PIN_PWMA = 25;   // Left motor PWM
+const int PIN_AIN1 = 21;   // Left motor direction 1
+const int PIN_AIN2 = 17;   // Left motor direction 2
+const int PIN_PWMB = 26;   // Right motor PWM
+const int PIN_BIN1 = 22;   // Right motor direction 1
+const int PIN_BIN2 = 23;   // Right motor direction 2
+
+// PWM properties (LEDC channels)
+const int FREQ = 5000;
+const int RES = 8;
+const int CH_PWM_L = 0;
+const int CH_PWM_R = 1;
+
+// Encoder pins (quadrature, CH_A only for counting)
+const int PIN_SPEED_LF = 35;
+const int PIN_SPEED_RF = 27;
+
+// I2C (shared bus: INA219 + OLED + IMU)
+const int PIN_I2C_SDA = 32;
+const int PIN_I2C_SCL = 33;
+
+// Sonar (external HC-SR04 on expansion GPIOs)
+const int PIN_TRIGGER = 4;
+const int PIN_ECHO = 5;
+
 #endif
 //------------------------------------------------------//
+
+// Default HAS_INA219 to 0 if not defined by board config
+#ifndef HAS_INA219
+#define HAS_INA219 0
+#endif
 
 #if (HAS_BLUETOOTH)
 #include <BLEDevice.h>
@@ -688,6 +750,13 @@ unsigned long voltage_interval = 1000;  //Interval for sending voltage measureme
 unsigned long voltage_time = 0;
 #endif
 
+#if (HAS_INA219)
+// INA219 voltage measurement
+INA219_WE ina219(0x42);
+unsigned long voltage_interval = 1000;
+unsigned long voltage_time = 0;
+#endif
+
 #if (HAS_SPEED_SENSORS_FRONT or HAS_SPEED_SENSORS_BACK or HAS_SPEED_SENSORS_MIDDLE)
 #if (OPENBOT == RTR_520)
 // Speed sensor
@@ -699,6 +768,10 @@ const unsigned int TICKS_PER_REV = 209;
 // 178rpm motor - reduction ratio 56, ticks per motor rotation 11
 // One revolution = 616 ticks
 const unsigned int TICKS_PER_REV = 616;
+#elif (OPENBOT == WAVE_ROVER)
+// N20 encoder motors: ~7 PPR x gear ratio ~200:1
+// One revolution = ~1400 ticks (calibrate after testing)
+const unsigned int TICKS_PER_REV = 1400;
 #else
 // Speed Sensor
 // Optical encoder - disk with 20 holes
@@ -780,6 +853,9 @@ void setup() {
 #endif
   // Initialize with the I2C addr 0x3C
 #if (HAS_OLED)
+#if (OPENBOT == WAVE_ROVER)
+  Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
+#endif
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 #endif
 #if (HAS_INDICATORS)
@@ -845,7 +921,7 @@ void setup() {
   esp_wifi_deinit();
 #endif
 
-#if (MCU == ESP32 && OPENBOT != MTV)
+#if (MCU == ESP32 && OPENBOT != MTV && OPENBOT != WAVE_ROVER)
   // PWMs
   // Configure PWM functionalitites
   ledcSetup(CH_PWM_L1, FREQ, RES);
@@ -893,6 +969,25 @@ void setup() {
   pinMode(PIN_DIR_R, OUTPUT);
   pinMode(PIN_DIR_L, LOW);
   pinMode(PIN_DIR_R, LOW);
+#endif
+
+#if (OPENBOT == WAVE_ROVER)
+  // TB6612FNG direction pins
+  pinMode(PIN_AIN1, OUTPUT);
+  pinMode(PIN_AIN2, OUTPUT);
+  pinMode(PIN_BIN1, OUTPUT);
+  pinMode(PIN_BIN2, OUTPUT);
+
+  // PWM channels for motor speed
+  ledcSetup(CH_PWM_L, FREQ, RES);
+  ledcSetup(CH_PWM_R, FREQ, RES);
+  ledcAttachPin(PIN_PWMA, CH_PWM_L);
+  ledcAttachPin(PIN_PWMB, CH_PWM_R);
+
+  // INA219 battery monitor (I2C addr 0x42, Wire already init'd above)
+  ina219.init();
+  ina219.setADCMode(SAMPLE_MODE_128);
+  ina219.setMeasureMode(CONTINUOUS);
 #endif
 
   Serial.begin(115200, SERIAL_8N1);
@@ -1071,7 +1166,7 @@ void loop() {
     bumper_time = millis();
   }
 #endif
-#if HAS_VOLTAGE_DIVIDER
+#if (HAS_VOLTAGE_DIVIDER || HAS_INA219)
   // Send voltage reading via serial
   if ((millis() - voltage_time) >= voltage_interval) {
     send_voltage_reading();
@@ -1108,6 +1203,12 @@ float get_voltage() {
   return float(array_sum) / array_size * ADC_FACTOR * VOLTAGE_DIVIDER_FACTOR;
 }
 
+#elif HAS_INA219
+
+float get_voltage() {
+  return ina219.getBusVoltage_V() + (ina219.getShuntVoltage_mV() / 1000.0);
+}
+
 #endif
 
 void update_vehicle() {
@@ -1117,6 +1218,9 @@ void update_vehicle() {
 #elif (OPENBOT == MTV)
   update_left_motors_mtv();
   update_right_motors_mtv();
+#elif (OPENBOT == WAVE_ROVER)
+  update_left_motors_wr();
+  update_right_motors_wr();
 #else
   update_left_motors();
   update_right_motors();
@@ -1193,6 +1297,77 @@ void stop_right_motors_mtv() {
 void coast_right_motors_mtv() {
   ledcWrite(RHS_PWM_OUT, 0);
   digitalWrite(PIN_DIR_R, LOW);
+}
+
+#elif (OPENBOT == WAVE_ROVER)
+
+// TB6612FNG motor control: PWM for speed, IN1/IN2 for direction
+void update_left_motors_wr() {
+  if (ctrl_left < 0) {
+    digitalWrite(PIN_AIN1, HIGH);
+    digitalWrite(PIN_AIN2, LOW);
+    ledcWrite(CH_PWM_L, -ctrl_left);
+  } else if (ctrl_left > 0) {
+    digitalWrite(PIN_AIN1, LOW);
+    digitalWrite(PIN_AIN2, HIGH);
+    ledcWrite(CH_PWM_L, ctrl_left);
+  } else {
+    if (coast_mode) {
+      // Coast: both LOW
+      digitalWrite(PIN_AIN1, LOW);
+      digitalWrite(PIN_AIN2, LOW);
+    } else {
+      // Brake: both HIGH
+      digitalWrite(PIN_AIN1, HIGH);
+      digitalWrite(PIN_AIN2, HIGH);
+    }
+    ledcWrite(CH_PWM_L, 0);
+  }
+}
+
+void update_right_motors_wr() {
+  if (ctrl_right < 0) {
+    digitalWrite(PIN_BIN1, HIGH);
+    digitalWrite(PIN_BIN2, LOW);
+    ledcWrite(CH_PWM_R, -ctrl_right);
+  } else if (ctrl_right > 0) {
+    digitalWrite(PIN_BIN1, LOW);
+    digitalWrite(PIN_BIN2, HIGH);
+    ledcWrite(CH_PWM_R, ctrl_right);
+  } else {
+    if (coast_mode) {
+      digitalWrite(PIN_BIN1, LOW);
+      digitalWrite(PIN_BIN2, LOW);
+    } else {
+      digitalWrite(PIN_BIN1, HIGH);
+      digitalWrite(PIN_BIN2, HIGH);
+    }
+    ledcWrite(CH_PWM_R, 0);
+  }
+}
+
+void stop_left_motors() {
+  digitalWrite(PIN_AIN1, HIGH);
+  digitalWrite(PIN_AIN2, HIGH);
+  ledcWrite(CH_PWM_L, 0);
+}
+
+void coast_left_motors() {
+  digitalWrite(PIN_AIN1, LOW);
+  digitalWrite(PIN_AIN2, LOW);
+  ledcWrite(CH_PWM_L, 0);
+}
+
+void stop_right_motors() {
+  digitalWrite(PIN_BIN1, HIGH);
+  digitalWrite(PIN_BIN2, HIGH);
+  ledcWrite(CH_PWM_R, 0);
+}
+
+void coast_right_motors() {
+  digitalWrite(PIN_BIN1, LOW);
+  digitalWrite(PIN_BIN2, LOW);
+  ledcWrite(CH_PWM_R, 0);
 }
 
 #else
@@ -1450,7 +1625,7 @@ void process_sonar_msg() {
 #endif
 
 void process_voltage_msg() {
-#if HAS_VOLTAGE_DIVIDER
+#if (HAS_VOLTAGE_DIVIDER || HAS_INA219)
   voltage_interval = atol(msg_buf);  // convert to long
 #endif
   Serial.println(String("vmin:") + String(VOLTAGE_MIN, 2));
@@ -1468,7 +1643,7 @@ void process_wheel_msg() {
 
 void process_feature_msg() {
   String msg = "f" + robot_type + ":";
-#if HAS_VOLTAGE_DIVIDER
+#if (HAS_VOLTAGE_DIVIDER || HAS_INA219)
   msg += "v:";
 #endif
 #if HAS_INDICATORS
@@ -1565,7 +1740,7 @@ void parse_msg() {
       process_sonar_msg();
       break;
 #endif
-#if HAS_VOLTAGE_DIVIDER
+#if (HAS_VOLTAGE_DIVIDER || HAS_INA219)
     case 'v':
       process_voltage_msg();
       break;
@@ -1609,7 +1784,7 @@ void drawString(String line1, String line2, String line3, String line4) {
 #if (HAS_OLED || DEBUG)
 
 void display_vehicle_data() {
-#if HAS_VOLTAGE_DIVIDER
+#if (HAS_VOLTAGE_DIVIDER || HAS_INA219)
   float voltage_value = get_voltage();
   String voltage_str = String("Voltage:    ") + String(voltage_value, 2);
 #else
@@ -1647,7 +1822,7 @@ void display_vehicle_data() {
 
 #endif
 
-#if (HAS_VOLTAGE_DIVIDER)
+#if (HAS_VOLTAGE_DIVIDER || HAS_INA219)
 
 void send_voltage_reading() {
   sendData("v" + String(get_voltage(), 2));

@@ -1,908 +1,253 @@
-# OpenBot - Plan Proiect FULL OPTIONS
+# OpenBot Max — Plan Proiect
 
-## Status: ASAMBLARE FIZICA — Componente sosite 20 Feb 2026, software gata, construim robotul
+## Status: WAVE ROVER MIGRATION — FIRMWARE READY (1 Mar 2026)
 
----
-
-## 1. CONFIGURATIE ALEASA
-
-| Parametru | Valoare |
-|---|---|
-| Body | **DIY Block Body Big LEGO** (3D print) + Camera Elevator |
-| MCU | Arduino Nano (ATmega328P) |
-| Motor Driver | L298N |
-| Conectare telefon | USB OTG (cablu) |
-| Versiune | **FULL OPTIONS** — toate senzoriile si accesoriile |
-| Imprimanta 3D | **Bambu Lab P2S** |
-| Filament | **Bambu Lab PLA Matte Orange** |
-| Telefon | **Google Pixel 10** (Tensor G5, 12GB RAM, 128GB) |
-| Voce AI | **Max Brain** — Whisper + Claude + ElevenLabs |
-| Limba | Romana (accent romanesc) |
+**Obiectiv curent:** Am migrat de la DIY body (Arduino Nano + L298N + cablare manuala) la **Waveshare Wave Rover** — chassis complet asamblat cu ESP32, TB6612FNG motor driver, INA219 battery monitor, OLED, encodere, UPS. Zero cablare complicata. Firmware-ul `openbot.ino` a fost adaptat cu config WAVE_ROVER. Se asteapta livrarea hardware-ului.
 
 ---
 
-## 2. IMPRIMANTA 3D — BAMBU LAB P2S
-
-### Specificatii Relevante
+## 1. CONFIGURATIE
 
 | Parametru | Valoare |
 |---|---|
-| Build volume | **256 x 256 x 256 mm** |
-| Viteza maxima miscare | 600 mm/s |
-| Acceleratie maxima | 20,000 mm/s² |
-| Nozzle inclus | 0.4mm hardened steel |
-| Temperatura maxima nozzle | 300°C |
-| Temperatura maxima heatbed | 110°C |
-| Build plate | Textured PEI |
-| Camera inchisa | Da (50°C chamber ready) |
-| Conectivitate | WiFi, Bluetooth, USB |
-| AMS compatibil | Da (AMS 2 Pro) |
+| Body | **Waveshare Wave Rover** (complet asamblat) |
+| Phone mount | Inclus (suport 1/4" surub) |
+| MCU | ESP32-WROOM-32 (pe placa Wave Rover) |
+| Motor Driver | TB6612FNG (cablat pe placa) |
+| Motoare | 4x N20 cu encoder quadrature |
+| Battery monitor | INA219 (I2C addr 0x42) |
+| OLED | 0.91" SSD1306 128x32 (I2C) |
+| UPS | 3x 18650 (7800mAh) cu protectie |
+| Conectare telefon | BLE (Bluetooth Low Energy) |
+| Telefon | Google Pixel 10 |
+| Amazon.de | B0CF55LM6Q (~€80) |
 
-### Compatibilitate cu OpenBot
+---
 
-| Cerinta OpenBot | Bambu Lab P2S | Status |
+## 2. DE CE WAVE ROVER?
+
+| Criteriu | DIY (inainte) | Wave Rover (acum) |
 |---|---|---|
-| Build plate min 240 x 150mm | 256 x 256mm | INCAPE LEJER |
-| PLA support | Da, nativ | PERFECT |
-| 0.4mm nozzle | Inclus standard | PERFECT |
-| 0.2mm layer height | Da | PERFECT |
-
-**Concluzie:** Piesa cea mai mare (block_body_bottom = 221x150mm) incape confortabil pe P2S cu 17mm margine. Nu e nevoie de varianta Slim sau Glueable.
-
----
-
-## 3. FILAMENT — BAMBU LAB PLA MATTE ORANGE
-
-### Setari Print (specifice P2S + PLA Matte)
-
-| Parametru | Valoare |
-|---|---|
-| Filament | Bambu Lab PLA Matte Orange, 1.75mm |
-| Detectie | **Automata via RFID** (Bambu Studio citeste spool-ul) |
-| Temperatura nozzle | **210°C** (range: 190-220°C) |
-| Temperatura bed | **35-45°C** (textured PEI, camera inchisa) |
-| Cooling fan | **Auto** (Bambu Studio default; off primele 1-2 layere) |
-| Max volumetric speed | ~12-15 mm³/s (PLA Matte standard) |
-| Retraction | Gestionata automat de Bambu Studio |
-| Uscare filament | 50°C / 8 ore (daca e absorbit umiditate) |
-
-**IMPORTANT:** Pe Bambu Lab P2S cu filament original Bambu Lab, pur si simplu incarci STL-ul in Bambu Studio, selectezi profilul PLA Matte (sau lasi RFID-ul sa-l detecteze automat), si printezi. Nu trebuie sa faci tuning manual.
+| Cablare | ~30 fire manuale, breadboard, L298N | Zero — totul pe placa |
+| Motoare | TT DC fara encoder real | N20 cu encoder quadrature |
+| Voltage monitor | Voltage divider manual | INA219 pe I2C (precis) |
+| Conectare telefon | USB OTG (cablu fizic) | BLE (wireless) |
+| Timp asamblare | ~3-4 ore | ~15 min (baterii + sonar + LED) |
+| Cost | ~€100+ (piese separate) | ~€80 (all-in-one) |
 
 ---
 
-## 4. PIESE DE PRINTAT
+## 3. LISTA PIESE
 
-### Fisiere STL (Block Body Big LEGO + Camera Elevator)
+### De comandat
 
-| # | Piesa | Fisier STL (cale relativa in repo) | Dimensiuni Aprox | Timp Estimat P2S |
+| # | Componenta | Sursa | Cost est. | Status |
 |---|---|---|---|---|
-| 1 | Block body bottom | `body/diy/cad/block_body/block_body_bottom.stl` | 221 x 150mm | ~4-5h |
-| 2 | Block body top big LEGO | `body/diy/cad/block_body/block_body_top_big_lego.stl` | 221 x 150mm | ~4-5h |
-| 3 | Camera elevator | `body/rc_truck/cad/rc_truck_body/camera_elevator.stl` | mic | ~15-20min |
-| 4 | Phone mount bottom | `body/phone_mount/phone_mount_bottom.stl` | mic | ~30-45min |
-| 5 | Phone mount top | `body/phone_mount/phone_mount_top.stl` | mic | ~20-30min |
-| | **TOTAL** | **5 piese** | | **~9-11h** |
+| 1 | Waveshare Wave Rover (B0CF55LM6Q) | Amazon.de | ~€80 | DE COMANDAT |
 
-**Nota:** Timpii sunt estimati pentru P2S la viteza standard (nu Ludicrous). P2S e semnificativ mai rapid decat imprimantele generic — o piesa de 13.5h pe Ender devine ~4-5h pe P2S.
+### Refolosim din build-ul DIY anterior
 
-**De ce Block Body Big LEGO?**
-- Mai mult spatiu interior = cablare mai usoara, electronica incape mai confortabil
-- Suprafata LEGO-compatibila pe top = poti monta accesorii, senzori, decoratiuni din LEGO
-- Camera elevator ridica phone mount-ul mai sus = camera vede mai bine cand te ridici in picioare sau cand Max te urmareste
-
-**Nota Camera Elevator:** Piesa este din proiectul RC Truck dar e compatibila — se monteaza intre body top si phone mount bottom cu aceleasi suruburi M3x25 (sau M3x35 daca e nevoie de suruburi mai lungi).
-
-### Profil Bambu Studio pentru OpenBot
-
-| Parametru | Valoare | Note |
+| # | Componenta | Sursa originala |
 |---|---|---|
-| Printer | Bambu Lab P2S 0.4mm nozzle | Selecteaza in Bambu Studio |
-| Filament | Bambu PLA Matte | Auto-detectat via RFID |
-| Layer height | **0.20mm** (Standard) | Profil "0.20mm Standard" |
-| Wall loops | 3 | Rezistenta structurala buna |
-| Top/bottom layers | 4 | Finisaj solid |
-| Infill | **30%** | Mai solid, ideal pentru robot in miscare |
-| Infill pattern | **Triangle** | Rezistenta excelenta in toate directiile |
-| Supports | **Da** (Generate Support: Yes, Pattern: Concentric, Density: 15%) | Recomandat pt Block Body |
-| Build plate adhesion | **Brim** (optional) | Recomandat pt body_bottom (piesa mare) |
-| Seam position | **Nearest** | Minimizeaza vizibilitatea cusaturii |
-| Print speed | **Default Bambu Studio** | P2S gestioneaza automat |
+| 1 | 3x 18650 Sony VTC6 | Bitmi |
+| 2 | HC-SR04 senzor ultrasonic | Bitmi |
+| 3 | Fire Dupont mama-mama (4 fire pt sonar) | Bitmi |
+| 4 | Rezistori 10kΩ + 20kΩ (voltage divider ECHO) | Bitmi (set 20 valori) |
+| 5 | Incarcator 18650 | Bitmi |
 
-### Pasi Printare in Bambu Studio
+### NU mai folosim (raman spare)
 
-1. Deschide **Bambu Studio**
-2. Selecteaza printer: **Bambu Lab P2S**
-3. Incarca STL-ul (drag & drop sau File > Import)
-4. Filament: se detecteaza automat via RFID, sau selecteaza manual **Bambu PLA Matte**
-5. Profil: **0.20mm Standard**
-6. Slice (butonul Slice Plate)
-7. Verifica preview-ul (fara probleme evidente)
-8. Send to Printer (WiFi) sau Export to SD card
-9. Printeaza
+- Arduino Nano + L298N + body 3D printat
+- Suport baterii extern + switch
+- Speed sensor IR + discuri encoder
+- LED-uri galbene (nu se monteaza)
+- Cablu USB-C OTG (Wave Rover foloseste BLE, nu USB)
+- Suruburi M3
 
-### Ordine Recomandata de Printare
+### Ce avem deja
 
-1. **camera_elevator.stl** (~15-20 min) — piesa mica, test rapid sa verifici ca totul merge
-2. **phone_mount_top.stl** (~20-30 min) — a doua piesa mica
-3. **phone_mount_bottom.stl** (~30-45 min) — a treia piesa mica
-4. **block_body_top_big_lego.stl** (~4-5h) — piesa mare cu LEGO studs
-5. **block_body_bottom.stl** (~4-5h) — piesa cea mai mare, printeaz-o ultima dupa ce esti sigur pe setari
-
-### Post-Processing dupa Print
-
-1. Scoate piesa de pe textured PEI (se dezlipeste usor dupa racire)
-2. Curata suporturile daca ai folosit (probabil nu e cazul)
-3. Verifica fitment-ul motorilor in sloturile din body_bottom
-4. Indeparteaza eventualele stringing sau blobs cu un cutter
+- Google Pixel 10 (configurat, OpenBot APK instalat)
+- Bambu Lab P2S (imprimanta 3D — nu e nevoie pt Wave Rover)
 
 ---
 
-## 5. LISTA COMPLETA DE PIESE — COMANDA BITMI.RO
+## 4. WAVE ROVER — GPIO PIN MAP
 
-### A. De comandat de pe Bitmi.ro (toate IN STOC, livrare 1-2 zile)
+Totul pe placa Wave Rover este deja cablat (motoare, encodere, INA219, OLED, IMU). Singurele conexiuni externe sunt HC-SR04 si LED-urile.
 
-| # | Componenta | Produs Bitmi | Pret | Qty | Subtotal | Link Bitmi.ro |
-|---|---|---|---|---|---|---|
-| 1 | Arduino Nano | Placa compatibila Arduino Nano V3 CH340G | 27.44 RON | 1 | 27.44 RON | [Bitmi](https://www.bitmi.ro/electronica/placa-de-dezvoltare-compatibila-arduino-nano-v3-ch340g-10360.html) |
-| 2 | L298N Motor Driver | Modul driver L298N cu punte H dubla | 11.99 RON | 1 | 11.99 RON | [Bitmi](https://www.bitmi.ro/electronica/modul-driver-l298n-cu-punte-h-dubla-pentru-motoare-dc-stepper-10400.html) |
-| 3 | TT Motor + roata | Set motor DC 3V-6V cu reductor si roata | 9.99 RON | **4** | 39.96 RON | [Bitmi](https://www.bitmi.ro/set-motor-dc-3v-6v-cu-reductor-si-roata-11227.html) |
-| 4 | Senzor Ultrasonic | Senzor ultrasonic HC-SR04 | 6.09 RON | 1 | 6.09 RON | [Bitmi](https://www.bitmi.ro/electronica/senzor-ultrasonic-hc-sr04-10406.html) |
-| 5 | Speed Sensor | Modul senzor fotoelectric IR masurare viteza | 4.26 RON | **2** | 8.52 RON | [Bitmi](https://www.bitmi.ro/electronica/modul-senzor-fotoelectric-ir-pentru-masurarea-vitezei-10410.html) |
-| 6 | Display OLED | Ecran OLED 0.96" I2C SSD1306 128x64 | 18.98 RON | 1 | 18.98 RON | [Bitmi](https://www.bitmi.ro/electronica/ecran-oled-0-96-cu-interfata-iic-i2c-10488.html) |
-| 7 | Baterii 18650 | Acumulator Li-Ion 18650 3000mAh Sony Murata VTC6 | 44.17 RON | **3** | 132.51 RON | [Bitmi](https://www.bitmi.ro/electrice/acumulator-li-ion-18650-3-6v-3000mah-30a-sony-murata-us18650vtc6-10596.html) |
-| 8 | Suport baterii 18650 | Suport prindere acumulator 18650 (interconectabile) | 2.09 RON | **3** | 6.27 RON | [Bitmi](https://www.bitmi.ro/electronica/suport-de-prindere-pentru-acumulatori-litiu-18650-10557.html) |
-| 9 | Incarcator 18650 | Incarcator 4 porturi 18650 Li-Ion 3.7V | 44.99 RON | 1 | 44.99 RON | [Bitmi](https://www.bitmi.ro/electrice/incarcator-cu-4-porturi-pentru-acumulatori-18650-10157.html) |
-| 10 | Fire Dupont tata-mama | 40x Fire Dupont tata-mama 30cm | 7.99 RON | 1 | 7.99 RON | [Bitmi](https://www.bitmi.ro/electronica/40-fire-dupont-tata-mama-30cm-10504.html) |
-| 11 | Fire Dupont mama-mama | 40x Fire Dupont mama-mama 20cm | 8.99 RON | 1 | 8.99 RON | [Bitmi](https://www.bitmi.ro/electronica/40-x-fire-dupont-mama-mama-20cm-10509.html) |
-| 12 | Set rezistori | Set 400 buc, 20 valori, 10ohm-1Mohm, 1/4W | 19.99 RON | 1 | 19.99 RON | [Bitmi](https://www.bitmi.ro/electronica/set-rezistori-20-de-valori-400-bucati-10-10m-1-4w-11255.html) |
-| | | | | **TOTAL BITMI:** | **333.72 RON** | |
+### ESP32 Pin Map (Wave Rover)
 
-**Nota baterii:** Poti reduce costul cu baterii alternative de pe Bitmi:
-- [LG MJ1 3500mAh — 39.xx RON/buc](https://www.bitmi.ro/electrice/acumulator-li-ion-18650-3-6v-3400mah-10a-lg-inr18650-mj1-10598.html) (mai multa capacitate, mai ieftin)
-- [Sanyo 2470mAh — ~25 RON/buc](https://www.bitmi.ro/electrice/acumulator-li-ion-18650-3-6v-2470mah-8a-sanyo-ur18650zm2-10854.html) (buget)
+```
+GPIO  Functie                   Status
+────  ────────────────────────  ──────
+25    Motor A PWM (stanga)      PE PLACA
+21    Motor A IN1               PE PLACA
+17    Motor A IN2               PE PLACA
+26    Motor B PWM (dreapta)     PE PLACA
+22    Motor B IN1               PE PLACA
+23    Motor B IN2               PE PLACA
+35    Encoder A CH_A            PE PLACA
+27    Encoder B CH_A            PE PLACA
+32    I2C SDA                   PE PLACA (INA219+OLED+IMU)
+33    I2C SCL                   PE PLACA
+4     HC-SR04 TRIGGER           EXTERN (fir Dupont)
+5     HC-SR04 ECHO              EXTERN (cu voltage divider 10k+20k)
+```
 
-**Nota rezistori:** Set-ul include 10k ohm dar NU include 150 ohm si 20k ohm. Inlocuitori din set:
-- In loc de 150 ohm → foloseste **220 ohm** (LED un pic mai slab, functioneaza perfect)
-- In loc de 20k ohm → foloseste **22k ohm** (factor divisor 3.2 in loc de 3.0, diferenta neglijabila)
+### Singura conexiune externa: HC-SR04 (4 fire Dupont)
 
-### B. De cumparat SEPARAT (nu sunt pe Bitmi)
+```
+HC-SR04       Wave Rover Header
+───────       ──────────────────
+VCC  ───────  5V
+GND  ───────  GND
+TRIG ───────  GPIO4
+ECHO ───────  GPIO5 (prin voltage divider: 10kΩ + 20kΩ → 3.33V)
+```
 
-| # | Componenta | Qty | De unde | Pret Estimat |
-|---|---|---|---|---|
-| 1 | Suruburi M3x25 | 16 buc | Dedeman / Bricostore / AliExpress | ~5-10 RON |
-| 2 | Piulite M3 | 16 buc | Dedeman / Bricostore / AliExpress | ~3-5 RON |
-| 3 | Suruburi M3x5 | 6 buc | Dedeman / Bricostore / AliExpress | ~3-5 RON |
-| 4 | LED-uri portocalii 5mm | 2 buc | Magazin electronice / AliExpress | ~2-3 RON |
-| 5 | Cablu USB OTG (Micro-USB sau USB-C) | 1 | eMag / Altex / Amazon | ~10-20 RON |
-| 6 | Intrerupator On/Off mic | 1 | Magazin electronice / AliExpress | ~2-3 RON |
-| 7 | Arc sau elastic (phone mount) | 1 | Ai acasa / orice magazin | ~0 RON |
+### Voltage divider pe ECHO (5V → 3.3V safe pt ESP32)
 
-### C. Ce ai deja
-
-| Componenta | Status |
-|---|---|
-| Bambu Lab P2S (imprimanta 3D) | AI |
-| Bambu Lab PLA Matte Orange (filament) | AI |
-
-### D. De comandat SUPLIMENTAR (Feb 2026)
-
-> Suporturile individuale 18650 de pe Bitmi NU incap in Block Body Big LEGO.
-> Comanda suportul comercial 3-celule (piesa oficiala OpenBot) + discuri encoder.
-
-| # | Componenta | Qty | De unde | Pret | Status |
-|---|---|---|---|---|---|
-| 1 | **Suport baterii 3x18650 (cutie serie)** | 1 | **Sierra.ro** | **17.70 RON** | DE COMANDAT |
-| 2 | **Discuri encoder 20 slot** (pt speed sensors) | 2 | Amazon.de / AliExpress | ~5-10 EUR pack | DE COMANDAT |
-| 3 | **Velcro adeziv** (fixare suport baterii) | 1 buc | Dedeman / bricolaj | ~3-5 RON | DE COMANDAT |
-
-**Suport baterii — piesa CRITICA:**
-- Cutie plastic pentru 3x 18650 in SERIE (output ~11.1V), 2 fire iesire (rosu + negru)
-- Dimensiuni: 76 x 59 x 21mm — INCAPE in Block Body Big LEGO
-- **Link:** [Sierra.ro — 17.70 RON, IN STOC](https://www.sierra.ro/cumpara/suport-acumulator-liion-format-18650-3-celule-in-serie-2151)
-- NU clipuri individuale (alea nu incap)!
-
-**Discuri encoder — pt speed sensors:**
-- Disc cu 20 sloturi, se pune pe axul interior al motorului TT
-- Fara disc, modulele senzor IR (Bitmi) nu pot masura viteza
-- OptimusDigital.ro are la 6 RON/buc dar STOC 0
-- [Amazon.com 10pack](https://www.amazon.com/Encoder-Lattice-Digital-Precision-Velocity/dp/B093LBHR95)
+```
+HC-SR04 ECHO ── [10kΩ] ──┬── [20kΩ] ── GND
+                           │
+                        GPIO5
+```
 
 ---
 
-## 6. COST TOTAL ESTIMAT
+## 5. ASAMBLARE + TEST — CHECKLIST
 
-| Sursa | Cost |
-|---|---|
-| **Bitmi.ro** (comanda principala) | **~334 RON** |
-| **Alte surse** (suruburi M3, LED, OTG, switch) | **~25-45 RON** |
-| **Google Pixel 10** (eMag) | **3,398 RON** |
-| **Filament PLA** (~150-200g din spool) | **~10-15 RON** |
-| **TOTAL PROIECT (fara telefon)** | **~370-395 RON** |
-| **TOTAL PROIECT (cu telefon)** | **~3,770-3,800 RON** |
+Wave Rover vine COMPLET asamblat. Singurele operatii fizice:
 
-*API costs (Claude + ElevenLabs) — platite lunar, separate. Estimat: ~5-15 EUR/luna la utilizare normala.*
+### Faza 1: Unboxing + baterii
+- [ ] Deschide cutia Wave Rover
+- [ ] Introdu 3x 18650 Sony VTC6 in UPS-ul Wave Rover
+- [ ] Verifica ca porneste (switch ON, LED-uri pe placa)
 
----
+### Faza 2: Backup factory firmware
+- [ ] Conecteaza Wave Rover la Mac prin USB-C
+- [ ] `esptool.py --port /dev/tty.usbserial-* read_flash 0 ALL waveshare_factory_backup.bin`
+- [ ] Salveaza backup-ul in loc sigur!
 
-## 7. SCHEMA CONEXIUNI (WIRING)
+### Faza 3: Flash OpenBot firmware
+- [ ] `arduino-cli compile --fqbn esp32:esp32:esp32 firmware/openbot/openbot.ino`
+- [ ] `arduino-cli upload -p /dev/tty.usbserial-* --fqbn esp32:esp32:esp32 firmware/openbot/openbot.ino`
 
-### Arduino Nano Pin Map (Full Options DIY)
+### Faza 4: Conecteaza HC-SR04 (4 fire Dupont — singura cablare!)
+- [ ] HC-SR04 VCC → 5V (header expansiune Wave Rover)
+- [ ] HC-SR04 GND → GND
+- [ ] HC-SR04 TRIG → GPIO4
+- [ ] HC-SR04 ECHO → GPIO5 (prin voltage divider: 10kΩ serie + 20kΩ la GND)
 
-```
-Arduino Nano          Componenta
-─────────────         ────────────────────────────────
-D2  ────────────────  Speed Sensor STANGA (OUT)
-D3  ────────────────  Speed Sensor DREAPTA (OUT)
-D4  ────────────────  LED Indicator STANGA (prin R 150 ohm)
-D5  ────────────────  L298N IN1 (PWM Motor Stanga)
-D6  ────────────────  L298N IN2 (PWM Motor Stanga)
-D7  ────────────────  LED Indicator DREAPTA (prin R 150 ohm)
-D9  ────────────────  L298N IN3 (PWM Motor Dreapta)
-D10 ────────────────  L298N IN4 (PWM Motor Dreapta)
-D11 ────────────────  HC-SR04 ECHO
-D12 ────────────────  HC-SR04 TRIGGER
-A4  ────────────────  OLED SDA (I2C)
-A5  ────────────────  OLED SCL (I2C)
-A7  ────────────────  Divisor Tensiune (punct mijloc R1/R2)
-5V  ────────────────  HC-SR04 VCC / Speed Sensors VCC / OLED VCC
-GND ────────────────  GND comun (toate componentele)
-```
+### Faza 5: Phone mount
+- [ ] Monteaza suportul de telefon (surub 1/4", vine in cutie)
 
-### Divisor Tensiune (Battery Monitor)
+### Faza 6: Test BLE
+- [ ] Deschide OpenBot app pe Pixel 10
+- [ ] Bluetooth → cauta "OpenBot: WAVE_ROVER"
+- [ ] Conecteaza
 
-```
-Baterie (+) ──── [R1 = 22k ohm] ──┬── [R2 = 10k ohm] ──── GND
-                                   │
-                               Arduino A7
+### Faza 7: Test functionalitate
+- [ ] Robot Info → verifica tensiune (9.6-12.6V)
+- [ ] Robot Info → verifica encodere (wheel speed)
+- [ ] Robot Info → verifica sonar (distance)
+- [ ] OLED → afiseaza voltage, RPM, distance
+- [ ] Free Roam → test motoare ambele directii
+- [ ] Object Tracking → test autonom
 
-Factor = (22k + 10k) / 10k = 3.2
-Tensiune maxima masurabila: 5V x 3.2 = 16V (suficient pentru 3S = 12.6V)
-Nota: Folosim 22k din set-ul Bitmi in loc de 20k. Diferenta e neglijabila.
-```
-
-### L298N Conexiuni
-
-```
-L298N              Conexiune
-─────              ─────────
-12V IN  ──────── Baterie (+) (prin switch On/Off)
-GND     ──────── Baterie (-) / Arduino GND
-5V OUT  ──────── Arduino 5V / distributor 5V
-ENA     ──────── JUMPER PE LOC (HIGH = motoare enabled)
-IN1     ──────── Arduino D5 (PWM motor stanga)
-IN2     ──────── Arduino D6 (PWM motor stanga)
-ENB     ──────── JUMPER PE LOC (HIGH = motoare enabled)
-IN3     ──────── Arduino D9 (PWM motor dreapta)
-IN4     ──────── Arduino D10 (PWM motor dreapta)
-OUT1/2  ──────── Motoare STANGA (2 motoare in paralel)
-OUT3/4  ──────── Motoare DREAPTA (2 motoare in paralel)
-```
-
-**CRITICAL: Jumper-urile ENA si ENB RAMAN pe loc! Firmware-ul OpenBot foloseste 4 pini PWM direct pe IN1-IN4 (nu pe ENA/ENB). Daca scoti jumper-urile, motoarele NU merg deloc.**
+### Faza 8: Calibrare encodere
+- [ ] Masoara distanta reala vs raportata
+- [ ] Ajusteaza TICKS_PER_REV in firmware daca e nevoie
+- [ ] Re-flash si re-test
 
 ---
 
-## 8. FIRMWARE (DEJA CONFIGURAT FULL OPTIONS)
+## 6. FIRMWARE
 
-Fisierul `firmware/openbot/openbot.ino` a fost modificat cu toate flag-urile activate:
+Fisier: `firmware/openbot/openbot.ino`
 
 ```c
-#define OPENBOT DIY
-#define MCU NANO
-#define HAS_VOLTAGE_DIVIDER 1    // Monitor baterie activ
-#define HAS_INDICATORS 1         // LED-uri semnalizare active
-#define HAS_SONAR 1              // Senzor ultrasonic activ
-#define SONAR_MEDIAN 1           // Filtru median sonar activ
-#define HAS_SPEED_SENSORS_FRONT 1 // Encodere viteza roti active
-#define HAS_OLED 1               // Display OLED activ
+#define OPENBOT WAVE_ROVER
+#define MCU ESP32
+#define HAS_BLUETOOTH 1
+#define HAS_INA219 1
+#define HAS_VOLTAGE_DIVIDER 0
+#define HAS_INDICATORS 0
+#define HAS_SONAR 1
+#define HAS_SPEED_SENSORS_FRONT 1
+#define HAS_OLED 1
 ```
 
-### Pasi Flash Firmware
+**Motor control:** TB6612FNG — PWM + 2 direction pins per motor (IN1/IN2 for direction, PWM for speed). Coast mode = both LOW, brake = both HIGH.
 
-1. Instaleaza **Arduino IDE** (https://www.arduino.cc/en/software)
-2. Instaleaza librarii (Tools > Manage Libraries):
-   - `PinChangeInterrupt` by Nico Hood
-   - `Adafruit SSD1306`
-   - `Adafruit GFX Library`
-3. Deschide `firmware/openbot/openbot.ino`
-4. Board: **Tools > Board > Arduino AVR Boards > Arduino Nano**
-5. Processor: **Tools > Processor > ATmega328P (Old Bootloader)**
-6. Port: **Tools > Port > selecteaza portul COM corect**
-7. Click **Upload** (sageata dreapta)
+**Voltage:** INA219 (I2C addr 0x42) — `getBusVoltage_V() + getShuntVoltage_mV()/1000`. No voltage divider needed.
 
-**Nota:** Daca Arduino Nano e clone chinezesc, instaleaza driverul CH340:
-- macOS: https://github.com/WCHSoftGroup/ch34xser_macos
-- Windows: https://www.wch-ic.com/downloads/CH341SER_EXE.html
+**Encodere:** N20 quadrature, TICKS_PER_REV = 1400 (calibrare dupa test).
+
+**I2C pins:** SDA=GPIO32, SCL=GPIO33 (custom, `Wire.begin(32,33)` before OLED init).
+
+**Librarii necesare:**
+- INA219_WE (Wolfgang Ewald)
+- Adafruit SSD1306
+- Adafruit GFX
+
+**Flash cu arduino-cli:**
+```bash
+arduino-cli compile --fqbn esp32:esp32:esp32 firmware/openbot/openbot.ino
+arduino-cli upload -p /dev/tty.usbserial-* --fqbn esp32:esp32:esp32 firmware/openbot/openbot.ino
+```
+
+**IMPORTANT:** Backup factory firmware Wave Rover INAINTE de flash!
 
 ---
 
-## 9. APLICATIE ANDROID
+## 7. APP ANDROID
 
-### Instalare (cea mai simpla cale)
+- **APK:** https://app.openbot.org/robot (sau GitHub releases v0.8.0)
+- **Telefon:** Google Pixel 10 — deja configurat, OpenBot APK instalat
+- **Conectare:** Bluetooth → "OpenBot: WAVE_ROVER"
+- **Moduri:** Free Roam, Data Collection, Autopilot, Object Tracking, Point Goal Nav, Controller Mapping, Robot Info
 
-1. Pe telefon, deschide: **https://app.openbot.org/robot**
-2. Descarca si instaleaza APK-ul
-3. Permite "Install from unknown sources" cand te intreaba
+---
 
-### Alternativ: descarca de pe GitHub
+## 8. MAX BRAIN — LATER
 
-Versiunea curenta: **v0.8.0** — https://github.com/isl-org/OpenBot/releases
+Brain-ul AI e deployed pe Render si functional. Il integram dupa ce robotul fizic merge.
 
-### Sau compileaza din sursa (avansat)
-
-```bash
-cd /Users/gabrielursan/Projects/OpenBot/android
-./gradlew robot:assembleDebug
-# APK in: robot/build/outputs/apk/debug/
-```
-
-### Telefoane Testate si Confirmate
-
-| Telefon | Procesor | Status |
-|---|---|---|
-| Samsung S22 Ultra | Exynos 2200 | Testat OK |
-| Samsung S20 FE 5G | Snapdragon 865 | Testat OK |
-| Google Pixel 6XL | Tensor | Testat OK |
-| Google Pixel 4XL | Snapdragon 855 | Testat OK |
-| Xiaomi Mi 9 | Snapdragon 855 | Testat OK |
-
-**Minim:** Android 7.0+, telefon din 2018+ cu procesor decent.
-
-**Telefonul NOSTRU: Google Pixel 10** — Tensor G5, 12GB RAM, Android 16.
-Cel mai bun chip pentru ML on-device (TPU optimizat pt TFLite). Perfect pentru Whisper + Object Detection.
-
-### Moduri Disponibile in App
-
-| Mod | Descriere |
+| Detaliu | Valoare |
 |---|---|
-| **Free Roam** | Control manual cu telemetrie live (viteza, baterie, distanta) |
-| **Data Collection** | Inregistreaza date senzori pt antrenament ML |
-| **Autopilot** | Condus autonom cu model TFLite pre-antrenat |
-| **Object Tracking** | Urmarire obiecte — 80 clase COCO (persoana, caine, masina, etc.) |
-| **Point Goal Navigation** | Navigare AR catre coordonate GPS |
-| **Controller Mapping** | Configurare gamepad Bluetooth (PS4/Xbox) |
-| **Robot Info** | Diagnostic — citeste toti senzorii in timp real |
+| URL | `https://max-brain.onrender.com` |
+| Repo | `github.com/gabrielursan-beep/openbot-max` (privat) |
+| Service ID | `srv-d6bgusogjchc73aj989g` |
+| Stack | FastAPI + Claude + ElevenLabs + Google APIs |
+| Voce | Jora Slobod, accent romanesc (`eleven_multilingual_v2` + `ro`) |
+| Wake word | "Max" |
+| Cron | Morning briefing L-V 09:00 |
 
-### Modele ML Pre-instalate
-
-- **MobileNetV1-300** — object detection default
-- **Autopilot Float** — model de condus autonom
-- **Navigation** — goal-based navigation
-- Alte modele downloadabile din app: YOLOv4-tiny, YOLOv5s/m/l, EfficientDet
+Fisiere: `max_brain/server/` (deploy Render) + `max_brain/client/` (telefon).
 
 ---
 
-## 10. TELEFON — GOOGLE PIXEL 10
+## 9. TROUBLESHOOTING
 
-### De ce Pixel 10?
-
-| Spec | Valoare | Relevanta OpenBot |
-|---|---|---|
-| Procesor | **Google Tensor G5** (3nm TSMC) | Cel mai bun chip pt TFLite/ML on-device |
-| RAM | **12GB** | Suficient pt Whisper + Object Detection + App simultan |
-| TPU | **60% mai puternic** vs Tensor G4 | Inferenta ML ultra-rapida |
-| Camera | 50MP principal + ultrawide | Excelenta pt Object Tracking si viziune |
-| USB | **USB-C 3.2** | Conexiune rapida la Arduino via OTG |
-| Android | **Android 16** | Cel mai recent, suport complet OpenBot |
-| Stocare | 128GB | Suficient pt modele ML si date |
-| 5G | Da | Internet rapid pt API calls (Claude, ElevenLabs) |
-
-### Pret si Status
-
-| Detail | Valoare |
+| Problema | Solutie |
 |---|---|
-| Pret | **3,398 RON** (eMag) |
-| Culoare | Indigo |
-| Status | **COMANDAT — vine azi** |
-
-### De cumparat separat
-
-- **Cablu USB-C OTG** (USB-C la USB-A) — pentru conectare Arduino Nano la Pixel 10
-- **Suport auto cu ventilatie** (optional) — daca vrei sa il folosesti si ca dashcam
-
----
-
-## 11. CONTROL VOCAL — MAX BRAIN (AI VOICE ASSISTANT)
-
-### Arhitectura Hybrid (Server + Client)
-
-```
-[Telefon/Client]                    [Server Render.com]
-+----------------+    WebSocket     +--------------------+
-| Whisper STT    | ---- text -----> | FastAPI app.py     |
-| Wake word      |                  |   +-- Claude AI    |
-| Audio player   | <-- audio+text - |   +-- ElevenLabs  |
-| Robot control  | <-- robot cmds - |   +-- Google APIs  |
-+----------------+                  |   +-- Memory DB    |
-                                    |   +-- Cron jobs    |
-                                    +--------------------+
-```
-
-**Telefonul** face: STT (Whisper), audio playback, senzori, robot control.
-**Serverul** face: Claude AI, TTS, Google APIs, memory, cron jobs.
-
-Protocol WebSocket:
-```
-Client -> Server: {"type": "client_info", "platform": "termux", "wants_audio": true, "version": "2.0"}
-Client -> Server: {"type": "command", "text": "...", "user": "Gabriel"}
-Client -> Server: {"type": "ping"}
-Server -> Client: {"type": "status", "message": "Thinking...", "model": "sonnet"}
-Server -> Client: {"type": "tool", "name": "read_emails", "status": "executing"}
-Server -> Client: {"type": "response", "text": "...", "audio_base64": "..."}
-Server -> Client: {"type": "robot_action", "command": "forward", "duration_seconds": 3}
-Server -> Client: {"type": "pong"}
-```
-
-### Componente Software
-
-| Componenta | Tehnologie | Rol |
-|---|---|---|
-| Speech-to-Text | **Whisper** (on-device, Pixel 10 TPU) | Transcrie vocea in text romanesc |
-| AI Brain | **Claude Sonnet 4.6** (rapid) / **Opus 4.6** (complex) | Intelege comanda, genereaza raspuns + actiune |
-| Text-to-Speech | **ElevenLabs** `eleven_multilingual_v2` | Voce Jora Slobod, accent romanesc |
-| Wake Word | **"Max"** | Robotul raspunde doar cand e strigat |
-
-### Configuratie Voce (IMPORTANT — Accent Romanesc)
-
-```python
-# ElevenLabs — FORTEAZA accent romanesc, NU englezesc
-model_id = "eleven_multilingual_v2"   # Model multilingv (NU turbo_v2_5!)
-language_code = "ro"                   # Forteaza limba romana
-voice_id = "OlBp4oyr3FBAGEAtJOnU"    # Jora Slobod
-similarity_boost = 0.85               # Fidelitate mare la vocea originala romaneasca
-stability = 0.6
-style = 0.15
-use_speaker_boost = True
-```
-
-**ATENTIE:** Daca schimbi modelul la `eleven_turbo_v2_5`, accentul devine englezesc!
-Pastreaza intotdeauna `eleven_multilingual_v2` + `language_code: "ro"`.
-
-### Selectia Automata a Modelului Claude
-
-| Tip comanda | Model | Latenta | Exemplu |
-|---|---|---|---|
-| Comenzi de miscare | Sonnet 4.6 | ~1-2s | "Max, mergi inainte" |
-| Intrebari simple | Sonnet 4.6 | ~1-2s | "Max, cat e ceasul?" |
-| Intrebari complexe | Opus 4.6 | ~3-5s | "Max, explica-mi cum functioneaza gravitatia" |
-| Conversatie filozofica | Opus 4.6 | ~3-5s | "Max, ce crezi despre AI?" |
-
-Cuvinte cheie care activeaza Opus: `explica`, `de ce`, `cum functioneaza`, `filozofie`, `parere`, `analizeaza`, `compara`, `gandeste`, `povesteste`, `detaliat`, `argumenteaza`, `pro si contra`, `ce crezi`.
-
-### Actiuni Robot Disponibile
-
-| Actiune ID | Descriere | Comanda vocala exemplu |
-|---|---|---|
-| `forward` | Merge inainte | "Max, mergi inainte" |
-| `backward` | Merge inapoi | "Max, da-te inapoi" |
-| `left` | Vireaza stanga | "Max, la stanga" |
-| `right` | Vireaza dreapta | "Max, la dreapta" |
-| `stop` | Opreste-te | "Max, opreste-te" |
-| `speed_up` | Accelereaza | "Max, mai repede" |
-| `slow_down` | Incetineste | "Max, incetineste" |
-| `track_person` | Urmareste persoana | "Max, urmareste-ma" |
-| `track_object` | Urmareste obiect | "Max, urmareste mingea" |
-| `autopilot_on` | Porneste autopilot | "Max, mergi singur" |
-| `autopilot_off` | Opreste autopilot | "Max, opreste autopilotul" |
-| `look` | Descrie ce vezi | "Max, ce vezi?" |
-| `status` | Raporteaza status | "Max, cum stai cu bateria?" |
-| `dance` | Danseaza | "Max, danseaza!" |
-
-### Personalitatea lui Max
-
-- Prietenos, entuziast si usor amuzant
-- Raspunde scurt (max 2-3 propozitii) la comenzi de miscare
-- Raspunde mai detaliat la intrebari si conversatii
-- Se adreseaza informal (cu "tu")
-- Raspunde cand e strigat "Max"
-- Nu foloseste emoji, markdown, sau formatare — doar text vorbit natural
-
-### Fisiere Max Brain (Hybrid)
-
-```
-max_brain/
-+-- server/                         # Deploy pe Render.com
-|   +-- app.py                      # FastAPI + WebSocket + REST
-|   +-- config.py                   # Configuratie (env vars)
-|   +-- claude_brain.py             # Claude AI agentic loop
-|   +-- tools.py                    # Tool definitions (~60 tools)
-|   +-- memory.py                   # SQLite memory system
-|   +-- elevenlabs_voice.py         # TTS (return bytes, no playback)
-|   +-- google_auth.py              # OAuth2 + API Key auth
-|   +-- gmail_service.py            # Gmail API
-|   +-- calendar_service.py         # Google Calendar
-|   +-- whatsapp_service.py         # WhatsApp (Green-API)
-|   +-- drive_service.py            # Google Drive
-|   +-- sheets_service.py           # Google Sheets
-|   +-- docs_service.py             # Google Docs
-|   +-- tasks_service.py            # Google Tasks
-|   +-- maps_service.py             # Google Maps
-|   +-- air_quality_service.py      # Air Quality API
-|   +-- smarthome_service.py        # Home Assistant
-|   +-- weather_service.py          # Vremea (Open-Meteo, gratuit)
-|   +-- news_service.py             # Stiri (Google News RSS, gratuit)
-|   +-- search_service.py           # Cautare web (DuckDuckGo, gratuit)
-|   +-- timer_service.py            # Timer & Alarme (in-memory)
-|   +-- keep_service.py             # Google Keep (Workspace)
-|   +-- slides_service.py           # Google Slides
-|   +-- forms_service.py            # Google Forms
-|   +-- auth_local.py               # OAuth2 local flow (run once)
-|   +-- requirements.txt            # fastapi, uvicorn, websockets
-|   +-- render.yaml                 # Render.com deploy config
-+-- client/                         # Ruleaza pe telefon/laptop
-|   +-- max_client.py               # WebSocket client + audio playback
-|   +-- requirements.txt            # websockets
-```
-
-### Securitate Chei API
-
-**Local:** Cheile API sunt in `.env` la radacina proiectului (GITIGNORED).
-**Server:** Env vars se seteaza direct pe Render.com dashboard.
-Google OAuth token: `GOOGLE_TOKEN_JSON` env var (JSON string cu access + refresh token).
-
-```
-Env vars necesare:
-- ANTHROPIC_API_KEY (Claude API)
-- ELEVENLABS_API_KEY (ElevenLabs TTS)
-- MAX_SERVER_KEY (autentificare client-server)
-- GOOGLE_MAPS_API_KEY (Maps, Air Quality)
-- GOOGLE_TOKEN_JSON (OAuth2 token, pe server)
-- GOOGLE_CREDENTIALS_JSON (OAuth2 credentials, pe server)
-- GMAIL_USER, GREEN_API_*, HOME_ASSISTANT_*
-```
-
-### Rulare
-
-**Server local:**
-```bash
-cd max_brain/server
-pip install -r requirements.txt
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
-```
-
-**Client local:**
-```bash
-cd max_brain/client
-pip install -r requirements.txt
-python max_client.py --url ws://localhost:8000/ws
-```
-
-**Client cu server Render:**
-```bash
-python max_client.py --url wss://max-brain.onrender.com/ws --key YOUR_KEY
-```
-
-### Deploy pe Render.com — DONE (19 Feb 2026)
-
-- **URL live:** `https://max-brain.onrender.com`
-- **GitHub repo:** `https://github.com/gabrielursan-beep/openbot-max` (privat)
-- **Service ID:** `srv-d6bgusogjchc73aj989g`
-- **Region:** Frankfurt
-- **Plan:** Starter
-- **Auto-deploy:** Da (la push pe `main`)
-- **Cron job:** Morning briefing luni-vineri la 09:00 (Romania) — `crn-d6bh3gcr85hc73baku20`
-- **Env vars setate:** ANTHROPIC_API_KEY, ELEVENLABS_API_KEY, MAX_SERVER_KEY, GOOGLE_MAPS_API_KEY, GMAIL_USER, GMAIL_APP_PASSWORD, HOME_ASSISTANT_URL, GOOGLE_TOKEN_JSON, GOOGLE_CREDENTIALS_JSON
-- **MAX_SERVER_KEY:** setat in `.env` local si pe Render
-
-Conectare client:
-```bash
-python3 max_client.py --url wss://max-brain.onrender.com/ws --key YOUR_MAX_SERVER_KEY
-```
+| ESP32 nu apare in IDE/CLI | Instaleaza driver CP2102 (inclus de obicei in macOS) |
+| Motoare nu merg | Verifica firmware WAVE_ROVER; check PIN_AIN1/AIN2/BIN1/BIN2 |
+| Motoare merg invers | Swap AIN1<->AIN2 sau BIN1<->BIN2 in firmware |
+| BLE nu apare | Verifica `HAS_BLUETOOTH 1`; restart ESP32 |
+| Tensiune = 0 | Verifica INA219 addr 0x42; I2C SDA=32, SCL=33 |
+| Sonar = 0 cm | Verifica TRIG=GPIO4, ECHO=GPIO5; voltage divider pe ECHO |
+| OLED nu afiseaza | `Wire.begin(32,33)` trebuie inainte de `display.begin()` |
+| Encodere citesc 0 | Verifica PIN_SPEED_LF=35, PIN_SPEED_RF=27; INPUT_PULLUP |
+| Factory restore | `esptool.py --port /dev/tty.usbserial-* write_flash 0 waveshare_factory_backup.bin` |
 
 ---
 
-## 12. ORDINE DE EXECUTIE (CHECKLIST)
-
-### Faza 1: Printare 3D (Bambu Lab P2S) — IN CURS
-- [ ] Deschide Bambu Studio
-- [ ] Selecteaza printer: Bambu Lab P2S
-- [ ] Profil: 0.20mm Standard, Bambu PLA Matte, Infill 30%, Triangle, Supports ON (Concentric 15%)
-- [ ] **STL-urile sunt in folderul `print_stl/` — deschide direct de acolo**
-- [ ] Print #1: `camera_elevator.stl` — test rapid (~15-20 min)
-- [ ] Print #2: `phone_mount_top.stl` (~20-30 min)
-- [ ] Print #3: `phone_mount_bottom.stl` (~30-45 min)
-- [ ] Print #4: `block_body_top_big_lego.stl` (~4-5h)
-- [ ] Print #5: `block_body_bottom.stl` (~4-5h)
-- [ ] Curata piesele printate dupa racire
-- [ ] Verifica fitment-ul camera elevator intre body top si phone mount
-
-### Faza 2: Comanda Piese Electronice — DONE + SUPLIMENTAR
-- [x] Comanda de pe Bitmi.ro toate cele 12 produse din Sectiunea 5A (~334 RON)
-- [x] Comanda separat: suruburi M3x25, piulite M3, M3x10, LED-uri, switch
-- [x] Comanda cablu USB-C OTG (USB-C la USB-A) — pentru Pixel 10
-- [x] Ciocan de lipit — AI
-- [ ] **COMANDA Sierra.ro:** suport baterii 3x18650 cutie serie (17.70 RON) — vezi sectiunea 5D
-- [ ] **COMANDA:** discuri encoder 20 slot pt speed sensors (2 buc) — Amazon/AliExpress
-- [ ] **COMANDA:** velcro adeziv (fixare suport baterii in body)
-
-### Faza 3: Pregatire Pixel 10 — CAND VINE TELEFONUL (azi)
-- [ ] Scoate din cutie si configureaza initial (Android 16)
-- [ ] Activeaza Developer Options (Settings > About > tap Build Number x7)
-- [ ] Activeaza USB Debugging (Settings > Developer Options > USB Debugging)
-- [ ] Instaleaza OpenBot APK (https://app.openbot.org/robot)
-- [ ] Testeaza camera — functioneaza OK?
-- [ ] Testeaza microfonul — inregistreaza o proba vocala
-- [ ] Instaleaza Whisper (cand integram voice control pe Android)
-- [ ] (Optional) Instaleaza Claude Code CLI pe Termux (vezi Faza 3b)
-
-### Faza 3b: Claude Code pe Termux (AI Debugging & Monitoring)
-
-Claude Code CLI direct pe telefon — monitorizare + fix probleme in timp real.
-
-**Optiunea 1 — Install direct (experimental, ARM64):**
-```bash
-# In Termux:
-pkg install nodejs
-npm install -g @anthropic-ai/claude-code
-claude login              # Autentificare cu cont Claude Max plan
-```
-
-**Daca merge, configureaza MCP servers:**
-```bash
-# MCP Render — acces la server, deploy, logs
-claude mcp add render --transport http https://mcp.render.com/mcp
-
-# Acces local: Claude Code vede deja tot filesystem-ul din Termux
-# ~/max-brain/client/max_client.py, config, logs — totul accesibil
-```
-
-**Optiunea 2 — Fallback SSH (daca npm install esueaza pe ARM64):**
-```bash
-# Pe Termux: porneste SSH server
-pkg install openssh
-sshd    # Asculta pe port 8022
-
-# De pe Mac (pe aceeasi retea WiFi):
-ssh -p 8022 user@<ip-pixel-10>
-# Acum ai Claude Code pe Mac cu acces la fisierele de pe telefon
-```
-
-**Ce poate face Claude Code pe telefon:**
-- Monitorizare in timp real: citeste logs, diagnosticheaza erori
-- Fix-uri live: editeaza max_client.py, config, setup scripts
-- Acces MCP Render: vede starea serverului, deploy-uri, logs server-side
-- Privire de ansamblu: vede tot ecosistemul (client local + server remote)
-- Debug OpenBot bridge: verifica conexiunea TCP:19400 cu OpenBot app
-
-### Faza 4: Asamblare Mecanica
-- [x] ~~Lipeste fire la cele 4 motoare~~ — DEJA FACUTE
-- [ ] Pune discurile encoder pe cele 2 motoare din FATA (cand vin)
-- [ ] Conecteaza motoarele la L298N (OUT1/2 stanga, OUT3/4 dreapta) INAINTE de montare
-- [ ] Monteaza cele 4 motoare pe body_bottom cu 8x M3x25 + 8x piulite M3
-- [ ] Monteaza L298N pe body_bottom cu 4x M3x10
-- [ ] **Verifica jumper-uri ENA/ENB pe loc!**
-- [ ] Monteaza HC-SR04 in fata (push-fit)
-
-### Faza 5: Baterii + Cablare Electronica
-- [ ] Lipeste velcro pe suportul 3-celule + pe interiorul body
-- [ ] Fixeaza suportul de baterii in body, introdu 3x 18650
-- [ ] Push-fit switch in slot, **LIPESTE** fir rosu baterii → switch → L298N +12V
-- [ ] Fir negru baterii → L298N GND (direct)
-- [ ] Conecteaza motoare: D5→IN1, D6→IN2, D9→IN3, D10→IN4
-- [ ] Conecteaza senzori la 5V + GND
-- [ ] Speed sensors: stanga D0→D2, dreapta D0→D3
-- [ ] Sonar: Trig→D12, Echo→D11
-- [ ] **LIPESTE** LED-uri (prin 150R): stanga→D4, dreapta→D7, GND ambele
-- [ ] **LIPESTE** voltage divider: 22K de la baterie(+), 10K la GND, punct comun→A7
-- [ ] OLED: VIN→5V, GND→GND, SCL→A5, SDA→A4
-- [ ] L298N 5V → Arduino 5V, L298N GND → Arduino GND
-
-### Faza 6: Firmware
-- [ ] Instaleaza Arduino IDE
-- [ ] Instaleaza driverul CH340 (daca Arduino e clone)
-- [ ] Instaleaza librariile: PinChangeInterrupt, Adafruit SSD1306, Adafruit GFX
-- [ ] Deschide `firmware/openbot/openbot.ino`
-- [ ] Verifica ca flag-urile sunt pe 1 (deja configurat)
-- [ ] Board: Arduino Nano, Processor: ATmega328P (Old Bootloader)
-- [ ] Upload firmware
-
-### Faza 7: Testare Hardware (inainte de asamblare finala)
-- [ ] Verifica tensiune baterie cu multimetru (9.6-12.6V)
-- [ ] Verifica 5V pe output-ul L298N
-- [ ] Testeaza motoarele individual
-- [ ] Verifica senzorul ultrasonic (pune mana in fata, verifica distanta)
-- [ ] Verifica LED-urile indicator (clipesc?)
-- [ ] Verifica OLED display (arata ceva?)
-- [ ] Verifica speed sensors (invarte roata, citeste?)
-
-### Faza 8: App Android + Test Basic
-- [ ] Conecteaza Pixel 10 cu USB-C OTG la Arduino
-- [ ] Deschide app-ul > **Robot Info** > Verifica toti senzorii
-- [ ] Testeaza **Free Roam** (control manual din app)
-- [ ] Testeaza **Object Tracking** (pune un obiect in fata)
-- [ ] Testeaza **Autopilot** (cu model pre-instalat)
-
-### Faza 9: Integrare Voice Control (Max Brain)
-- [ ] Portare `max_brain/` pe Android (Kotlin/Java wrapper pt API calls)
-- [ ] Integreaza Whisper on-device pe Pixel 10 (whisper.cpp sau whisper-android)
-- [ ] Implementeaza wake word detection ("Max")
-- [ ] Conecteaza pipeline: Whisper STT → Claude API → ElevenLabs TTS
-- [ ] Ruta actiuni de la Claude catre OpenBot motor control
-- [ ] Implementeaza camera vision (trimite frame base64 la Claude cu `look`)
-- [ ] Testeaza accent romanesc pe device (ElevenLabs multilingual_v2 + ro)
-- [ ] Optimizeaza latenta end-to-end (target: < 3 secunde)
-- [ ] Adauga conversation history (memoria conversatiei)
-
-### Faza 10: Asamblare Finala
-- [ ] Monteaza block_body_top_big_lego pe block_body_bottom cu 2x M3x5
-- [ ] Monteaza camera_elevator pe body_top (intre body si phone mount)
-- [ ] Monteaza phone_mount_bottom pe camera_elevator (suruburi M3x25 sau M3x35)
-- [ ] Monteaza phone_mount_top cu arc/elastic
-- [ ] Pune Pixel 10 in mount
-- [ ] Conecteaza USB-C OTG
-- [ ] Test complet: voce + miscare + viziune
-- [ ] GATA! Max e functional!
-
----
-
-## 13. STRUCTURA PROIECT (FISIERE IMPORTANTE)
-
-```
-OpenBot/
-├── .env                                   ← CHEI API (GITIGNORED!)
-├── .gitignore                             ← Include .env, __pycache__, venv/
-├── PROJECT_PLAN.md                        ← ACEST DOCUMENT
-├── firmware/openbot/openbot.ino           ← FIRMWARE (configurat full options)
-├── print_stl/                             ← FOLDER CU TOATE STL-URILE DE PRINTAT
-│   ├── 1_camera_elevator.stl              ← PRINT #1 (test rapid)
-│   ├── 2_phone_mount_top.stl              ← PRINT #2
-│   ├── 3_phone_mount_bottom.stl           ← PRINT #3
-│   ├── 4_block_body_top_big_lego.stl      ← PRINT #4 (piesa mare)
-│   └── 5_block_body_bottom.stl            ← PRINT #5 (piesa mare, ultima)
-├── body/diy/
-│   ├── cad/block_body/                    ← Sursa STL-uri body
-│   └── README.md                          ← Instructiuni asamblare oficiale
-├── body/phone_mount/                      ← Sursa STL-uri phone mount
-├── body/rc_truck/cad/rc_truck_body/       ← Sursa camera_elevator.stl
-├── android/
-│   ├── robot/                             ← App-ul principal robot
-│   └── controller/                        ← App controller (telefon #2, optional)
-├── max_brain/                             ← VOICE CONTROL MODULE (hybrid server+client)
-│   ├── README.md                          ← Documentatie Max Brain
-│   ├── server/                            ← Deploy pe Render.com
-│   │   ├── app.py                         ← FastAPI + WebSocket + REST
-│   │   ├── config.py                      ← Configuratie (env vars)
-│   │   ├── claude_brain.py                ← Claude AI agentic loop
-│   │   ├── tools.py                       ← Tool definitions (~60 tools)
-│   │   ├── elevenlabs_voice.py            ← TTS (return bytes, no playback)
-│   │   ├── google_auth.py                 ← OAuth2 + API Key auth
-│   │   ├── *_service.py                   ← Gmail, Calendar, Drive, Sheets, etc.
-│   │   ├── requirements.txt               ← fastapi, uvicorn, websockets
-│   │   └── render.yaml                    ← Render.com deploy config
-│   └── client/                            ← Ruleaza pe telefon/laptop
-│       ├── max_client.py                  ← WebSocket client v2.0 + OpenBot bridge TCP:19400
-│       ├── config_client.json             ← Config centralizat (server, whisper, wake word)
-│       ├── setup_termux.sh                ← Setup Termux: packages, whisper.cpp, Claude Code
-│       ├── boot/start-max.sh              ← Auto-start la boot (Termux:Boot)
-│       └── requirements.txt               ← websockets
-└── docs/images/
-    └── wiring_diagram.png                 ← Schema de conexiuni vizuala
-```
-
----
-
-## 14. TROUBLESHOOTING
-
-| Problema | Cauza Probabila | Solutie |
-|---|---|---|
-| Arduino nu apare in IDE | Driver lipsa | Instaleaza driver CH340 |
-| Motoarele nu merg deloc | Jumper-ele ENA/ENB scoase | **Pune jumper-urile inapoi!** ENA/ENB trebuie ON |
-| Motoarele merg invers | Polaritate inversata | Inverseaza firele + si - la motor pe L298N |
-| Un motor merge, altul nu | Conexiune slaba | Verifica lipiturile si OUT1-4 |
-| Telefonul nu vede Arduino | Cablu OTG incompatibil | Incearca alt cablu; verifica USB debugging ON |
-| Tensiune baterie citeste 0 | Divisor de tensiune gresit | Verifica 22K/10K si pinul A7 cu multimetru |
-| Sonar citeste 0 cm | Pini inversati sau conector | Verifica Trigger=D12, Echo=D11 |
-| OLED nu afiseaza nimic | I2C gresit | Verifica SDA=A4, SCL=A5; adresa I2C = 0x3C |
-| Robot nu vireaza pe covor | Frictiune 4WD fara diferential | Normal; testeaza pe suprafata neteda |
-| App crash pe telefon | Telefon prea vechi | Minim Android 7.0, procesor din 2018+ |
-| Print se dezlipeste de pat | Adhesion | Adauga Brim in Bambu Studio; curata PEI plate |
-| Print warped/curbat | Camera prea calda pt PLA | Deschide usa P2S in timpul printarii PLA |
-| ElevenLabs accent englezesc | Model gresit | Foloseste `eleven_multilingual_v2` + `language_code: "ro"` |
-| Claude returneaza JSON invalid | Markdown backticks | `claude_brain.py` stripuieste automat ```json fences |
-| Max nu raspunde la voce | Whisper nu transcrrie | Verifica microfon, limba setata pe "ro" |
-| Latenta prea mare (>5s) | Model Claude prea greu | Verifica ca folosesti Sonnet, nu Opus, pt comenzi simple |
-| ElevenLabs 401 error | API key expirata/invalida | Verifica ELEVENLABS_API_KEY in .env |
-| Claude 404 error | Model ID gresit | Verifica model: `claude-sonnet-4-6` (nu cu data suffix!) |
-
----
-
-## 15. REFERINTE
+## 10. REFERINTE
 
 - **Repo oficial:** https://github.com/isl-org/OpenBot
-- **Site oficial:** https://www.openbot.org/
-- **Instructiuni asamblare:** `body/diy/README.md` in repo
-- **Wiring diagram:** `docs/images/wiring_diagram.png` in repo
-- **Android app releases:** https://github.com/isl-org/OpenBot/releases
-- **Bambu Lab P2S specs:** https://bambulab.com/en/p2s/specs
-- **Bambu Studio download:** https://bambulab.com/en/download/studio
-- **Bitmi.ro** (furnizor principal piese RO): https://www.bitmi.ro/
-- **Claude API docs:** https://docs.anthropic.com/
-- **ElevenLabs API docs:** https://elevenlabs.io/docs/api-reference
-- **ElevenLabs Voice Library:** https://elevenlabs.io/app/agents/voice-library
-- **Whisper (OpenAI):** https://github.com/openai/whisper
-- **whisper.cpp (C++ port for mobile):** https://github.com/ggerganov/whisper.cpp
-- **Google Pixel 10:** https://store.google.com/product/pixel_10
-
----
-
-## 16. PROGRES SETUP (Feb 2026)
-
-### Software — COMPLET
-- [x] **PASUL 1:** Developer Mode pe Pixel 10
-- [x] **PASUL 2:** OpenBot v0.8.0 instalat
-- [x] **PASUL 3:** F-Droid + Termux + Termux:API + Termux:Boot
-- [x] **PASUL 4:** Transfer fișiere + setup Termux + Whisper compilat
-- [x] **PASUL 5:** Config server key setat via ADB push
-- [~] **PASUL 6:** Test voce Max Brain — PARTIAL (text mode OK, voice mode debug in progress)
-- [x] **PASUL 9:** Decizie M3x5 → folosim M3x10 ca alternativă
-
-### Componente Bitmi — SOSITE (20 Feb 2026)
-Toate componentele au sosit: Arduino Nano, L298N, motoare TT, HC-SR04, OLED, baterii 18650, switch, LEDs, șuruburi M3x25+M3x10, cablu USB OTG, fire Dupont, rezistoare.
-
-### Comenzi SUPLIMENTARE (20 Feb 2026)
-- [ ] **Sierra.ro:** Suport baterii 3x18650 cutie serie — 17.70 RON, IN STOC
-- [ ] **Amazon/AliExpress:** 2x discuri encoder 20 slot pt motor TT
-- [ ] **Dedeman/bricolaj:** Velcro adeziv
-- **Motiv:** Suporturile individuale 18650 (Bitmi) NU incap in Block Body Big LEGO. Suportul comercial 3-celule (76x59x21mm) e piesa oficiala OpenBot.
-
----
-
-## 17. ASAMBLARE ROBOT FIZIC (20 Feb 2026)
-
-> **Ghid complet cu checklist:** `max_brain/docs/ASSEMBLY_CHECKLIST.md`
-
-### Sumar faze asamblare (12 faze)
-
-| Faza | Descriere | Status |
-|------|-----------|--------|
-| 1 | Pregătire motoare (fire + discuri encoder) | [ ] |
-| 2 | Conectare motoare la L298N + montare pe body | [ ] |
-| 3 | Montare L298N (jumper-uri ENA/ENB RĂMÂN pe loc!) | [ ] |
-| 4 | Senzor ultrasonic HC-SR04 | [ ] |
-| 5 | LED-uri indicator cu rezistori 150Ω | [ ] |
-| 6 | Phone mount | [ ] |
-| 7 | Speed sensors | [ ] |
-| 8 | Baterii + switch | [ ] |
-| 9 | Cablare completă (Dupont) | [ ] |
-| 10 | Închidere body + roți | [ ] |
-| 11 | Arduino IDE + Upload firmware | [ ] |
-| 12 | Test end-to-end | [ ] |
-
-### Corecții critice față de planul inițial
-
-1. **VOLTAGE_DIVIDER_FACTOR BUG** (firmware linia 116): `(22 + 10) / 10` era integer division = 3 în loc de 3.2. **CORECTAT** la `(22.0 + 10.0) / 10.0`.
-
-2. **Jumper-uri ENA/ENB:** NU se scot! Firmware-ul folosește 4 PWM pe IN1-IN4, ENA/ENB trebuie HIGH (jumper ON). Confirmat din wiring_diagram.png oficial.
-
-### Cablare rapidă — pin map
-
-```
-Arduino D5  → L298N IN1    (motor stânga)
-Arduino D6  → L298N IN2    (motor stânga)
-Arduino D9  → L298N IN4    (motor dreapta)
-Arduino D10 → L298N IN3    (motor dreapta)
-Arduino D2  → Speed sensor stânga D0
-Arduino D3  → Speed sensor dreapta D0
-Arduino D4  → LED stânga (prin 150Ω)
-Arduino D7  → LED dreapta (prin 150Ω)
-Arduino D12 → HC-SR04 Trig
-Arduino D11 → HC-SR04 Echo
-Arduino A7  → Voltage divider (22kΩ+10kΩ)
-Arduino A5  → OLED SCL
-Arduino A4  → OLED SDA
-L298N 5V    → Arduino 5V + senzori VCC
-L298N GND   → Arduino GND + senzori GND
-Baterie +   → Switch → L298N +12V
-Baterie -   → L298N GND
-```
-
-### Șuruburi necesare
-
-| Utilizare | Tip | Cantitate |
-|-----------|-----|-----------|
-| Motoare pe body | M3x25 + piulițe | 8+8 |
-| Phone mount | M3x25 + piulițe | 2+2 |
-| Top cover | M3x25 + piulițe | 6+6 |
-| L298N pe body | M3x10 | 4 |
-| Speed sensors | M3x10 | 2 |
-| **Total** | M3x25: 16 (ai 20) / M3x10: 6 (ai 20) | |
+- **Instructiuni asamblare:** `body/diy/README.md` (DIY Option 1)
+- **Wiring diagram:** `docs/images/wiring_diagram.png`
+- **Firmware docs:** `firmware/README.md`
+- **Android releases:** https://github.com/isl-org/OpenBot/releases
