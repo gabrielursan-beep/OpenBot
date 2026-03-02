@@ -1,8 +1,8 @@
 # OpenBot Max — Plan Proiect
 
-## Status: WAVE ROVER MIGRATION — FIRMWARE READY (1 Mar 2026)
+## Status: WAVE ROVER COMANDAT — FIRMWARE READY (2 Mar 2026)
 
-**Obiectiv curent:** Am migrat de la DIY body (Arduino Nano + L298N + cablare manuala) la **Waveshare Wave Rover** — chassis complet asamblat cu ESP32, TB6612FNG motor driver, INA219 battery monitor, OLED, encodere, UPS. Zero cablare complicata. Firmware-ul `openbot.ino` a fost adaptat cu config WAVE_ROVER. Se asteapta livrarea hardware-ului.
+**Obiectiv curent:** Migrat de la DIY body la **Waveshare Wave Rover** — chassis complet asamblat, zero cablare. Firmware adaptat. Wave Rover COMANDAT pe Amazon.de. Se asteapta livrarea.
 
 ---
 
@@ -43,24 +43,23 @@
 
 | # | Componenta | Sursa | Cost est. | Status |
 |---|---|---|---|---|
-| 1 | Waveshare Wave Rover (B0CF55LM6Q) | Amazon.de | ~€80 | DE COMANDAT |
+| 1 | Waveshare Wave Rover (B0CF55LM6Q) | Amazon.de | ~€80 | COMANDAT (2 Mar 2026) |
 
 ### Refolosim din build-ul DIY anterior
 
 | # | Componenta | Sursa originala |
 |---|---|---|
 | 1 | 3x 18650 Sony VTC6 | Bitmi |
-| 2 | HC-SR04 senzor ultrasonic | Bitmi |
-| 3 | Fire Dupont mama-mama (4 fire pt sonar) | Bitmi |
-| 4 | Rezistori 10kΩ + 20kΩ (voltage divider ECHO) | Bitmi (set 20 valori) |
-| 5 | Incarcator 18650 | Bitmi |
+| 2 | Incarcator 18650 | Bitmi |
 
 ### NU mai folosim (raman spare)
 
 - Arduino Nano + L298N + body 3D printat
+- HC-SR04 senzor ultrasonic (nu are loc pe Wave Rover)
 - Suport baterii extern + switch
 - Speed sensor IR + discuri encoder
-- LED-uri galbene (nu se monteaza)
+- LED-uri galbene
+- Fire Dupont, rezistori
 - Cablu USB-C OTG (Wave Rover foloseste BLE, nu USB)
 - Suruburi M3
 
@@ -73,45 +72,26 @@
 
 ## 4. WAVE ROVER — GPIO PIN MAP
 
-Totul pe placa Wave Rover este deja cablat (motoare, encodere, INA219, OLED, IMU). Singurele conexiuni externe sunt HC-SR04 si LED-urile.
+Totul pe placa Wave Rover este deja cablat. ZERO conexiuni externe.
 
-### ESP32 Pin Map (Wave Rover)
-
-```
-GPIO  Functie                   Status
-────  ────────────────────────  ──────
-25    Motor A PWM (stanga)      PE PLACA
-21    Motor A IN1               PE PLACA
-17    Motor A IN2               PE PLACA
-26    Motor B PWM (dreapta)     PE PLACA
-22    Motor B IN1               PE PLACA
-23    Motor B IN2               PE PLACA
-35    Encoder A CH_A            PE PLACA
-27    Encoder B CH_A            PE PLACA
-32    I2C SDA                   PE PLACA (INA219+OLED+IMU)
-33    I2C SCL                   PE PLACA
-4     HC-SR04 TRIGGER           EXTERN (fir Dupont)
-5     HC-SR04 ECHO              EXTERN (cu voltage divider 10k+20k)
-```
-
-### Singura conexiune externa: HC-SR04 (4 fire Dupont)
+### ESP32 Pin Map (Wave Rover) — totul pe placa
 
 ```
-HC-SR04       Wave Rover Header
-───────       ──────────────────
-VCC  ───────  5V
-GND  ───────  GND
-TRIG ───────  GPIO4
-ECHO ───────  GPIO5 (prin voltage divider: 10kΩ + 20kΩ → 3.33V)
+GPIO  Functie
+────  ────────────────────────
+25    Motor A PWM (stanga)
+21    Motor A IN1
+17    Motor A IN2
+26    Motor B PWM (dreapta)
+22    Motor B IN1
+23    Motor B IN2
+35    Encoder A CH_A
+27    Encoder B CH_A
+32    I2C SDA (INA219+OLED+IMU)
+33    I2C SCL
 ```
 
-### Voltage divider pe ECHO (5V → 3.3V safe pt ESP32)
-
-```
-HC-SR04 ECHO ── [10kΩ] ──┬── [20kΩ] ── GND
-                           │
-                        GPIO5
-```
+Fara sonar, fara LED-uri. Nimic extern.
 
 ---
 
@@ -133,29 +113,22 @@ Wave Rover vine COMPLET asamblat. Singurele operatii fizice:
 - [ ] `arduino-cli compile --fqbn esp32:esp32:esp32 firmware/openbot/openbot.ino`
 - [ ] `arduino-cli upload -p /dev/tty.usbserial-* --fqbn esp32:esp32:esp32 firmware/openbot/openbot.ino`
 
-### Faza 4: Conecteaza HC-SR04 (4 fire Dupont — singura cablare!)
-- [ ] HC-SR04 VCC → 5V (header expansiune Wave Rover)
-- [ ] HC-SR04 GND → GND
-- [ ] HC-SR04 TRIG → GPIO4
-- [ ] HC-SR04 ECHO → GPIO5 (prin voltage divider: 10kΩ serie + 20kΩ la GND)
-
-### Faza 5: Phone mount
+### Faza 4: Phone mount
 - [ ] Monteaza suportul de telefon (surub 1/4", vine in cutie)
 
-### Faza 6: Test BLE
+### Faza 5: Test BLE
 - [ ] Deschide OpenBot app pe Pixel 10
 - [ ] Bluetooth → cauta "OpenBot: WAVE_ROVER"
 - [ ] Conecteaza
 
-### Faza 7: Test functionalitate
+### Faza 6: Test functionalitate
 - [ ] Robot Info → verifica tensiune (9.6-12.6V)
 - [ ] Robot Info → verifica encodere (wheel speed)
-- [ ] Robot Info → verifica sonar (distance)
-- [ ] OLED → afiseaza voltage, RPM, distance
+- [ ] OLED → afiseaza voltage, RPM
 - [ ] Free Roam → test motoare ambele directii
 - [ ] Object Tracking → test autonom
 
-### Faza 8: Calibrare encodere
+### Faza 7: Calibrare encodere
 - [ ] Masoara distanta reala vs raportata
 - [ ] Ajusteaza TICKS_PER_REV in firmware daca e nevoie
 - [ ] Re-flash si re-test
@@ -173,23 +146,22 @@ Fisier: `firmware/openbot/openbot.ino`
 #define HAS_INA219 1
 #define HAS_VOLTAGE_DIVIDER 0
 #define HAS_INDICATORS 0
-#define HAS_SONAR 1
+#define HAS_SONAR 0
 #define HAS_SPEED_SENSORS_FRONT 1
 #define HAS_OLED 1
 ```
 
-**Motor control:** TB6612FNG — PWM + 2 direction pins per motor (IN1/IN2 for direction, PWM for speed). Coast mode = both LOW, brake = both HIGH.
+**Motor control:** TB6612FNG — PWM + 2 direction pins per motor. Coast = both LOW, brake = both HIGH.
 
-**Voltage:** INA219 (I2C addr 0x42) — `getBusVoltage_V() + getShuntVoltage_mV()/1000`. No voltage divider needed.
+**Voltage:** INA219 (I2C addr 0x42) — continuous mode, no voltage divider needed.
 
 **Encodere:** N20 quadrature, TICKS_PER_REV = 1400 (calibrare dupa test).
 
-**I2C pins:** SDA=GPIO32, SCL=GPIO33 (custom, `Wire.begin(32,33)` before OLED init).
+**I2C:** SDA=GPIO32, SCL=GPIO33 — `Wire.begin(32,33)` before OLED init.
 
-**Librarii necesare:**
-- INA219_WE (Wolfgang Ewald)
-- Adafruit SSD1306
-- Adafruit GFX
+**Fara sonar, fara LED-uri.** Zero conexiuni externe.
+
+**Librarii necesare:** INA219_WE, Adafruit SSD1306, Adafruit GFX
 
 **Flash cu arduino-cli:**
 ```bash
@@ -237,7 +209,6 @@ Fisiere: `max_brain/server/` (deploy Render) + `max_brain/client/` (telefon).
 | Motoare merg invers | Swap AIN1<->AIN2 sau BIN1<->BIN2 in firmware |
 | BLE nu apare | Verifica `HAS_BLUETOOTH 1`; restart ESP32 |
 | Tensiune = 0 | Verifica INA219 addr 0x42; I2C SDA=32, SCL=33 |
-| Sonar = 0 cm | Verifica TRIG=GPIO4, ECHO=GPIO5; voltage divider pe ECHO |
 | OLED nu afiseaza | `Wire.begin(32,33)` trebuie inainte de `display.begin()` |
 | Encodere citesc 0 | Verifica PIN_SPEED_LF=35, PIN_SPEED_RF=27; INPUT_PULLUP |
 | Factory restore | `esptool.py --port /dev/tty.usbserial-* write_flash 0 waveshare_factory_backup.bin` |

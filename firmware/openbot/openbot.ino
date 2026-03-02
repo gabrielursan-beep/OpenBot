@@ -549,7 +549,7 @@ const float VOLTAGE_MIN = 6.0f;
 const float VOLTAGE_LOW = 9.0f;
 const float VOLTAGE_MAX = 12.6f;
 #define HAS_INDICATORS 0
-#define HAS_SONAR 1
+#define HAS_SONAR 0
 #define SONAR_MEDIAN 0
 #define HAS_BUMPER 0
 #define HAS_SPEED_SENSORS_FRONT 1
@@ -585,10 +585,6 @@ const int PIN_SPEED_RF = 27;
 // I2C (shared bus: INA219 + OLED + IMU)
 const int PIN_I2C_SDA = 32;
 const int PIN_I2C_SCL = 33;
-
-// Sonar (external HC-SR04 on expansion GPIOs)
-const int PIN_TRIGGER = 4;
-const int PIN_ECHO = 5;
 
 #endif
 //------------------------------------------------------//
